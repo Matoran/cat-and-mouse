@@ -11,13 +11,16 @@
 
 void init_mouse(sprites_t sprites){
 	LPC_GPIO1->FIODIR &= ~(0b11111 << 19);
-	mouse.posx = 100;
-	mouse.posy = 100;
+	mouse.new_posx = 100;
+	mouse.new_posy = 100;
+	mouse.old_posx = 100;
+	mouse.old_posy = 100;
 	mouse.new_dir = 0;
+	mouse.old_dir = 0;
 	mouse.not_moving = 0;
 	mouse.vitality = VITALITYMAX;
 	mouse.m = 0;
-	display_bitmap16(sprites.mouse_im[mouse.new_dir].bitmap, mouse.posx, mouse.posy, sprites.mouse_im[mouse.new_dir].width, sprites.mouse_im[mouse.new_dir].height);
+	display_bitmap16(sprites.mouse_im[mouse.new_dir].bitmap, mouse.new_posx, mouse.new_posy, sprites.mouse_im[mouse.new_dir].width, sprites.mouse_im[mouse.new_dir].height);
 }
 
 /***********************************
@@ -39,26 +42,27 @@ void task_mouse(sprites_t sprites){
 	if(mouse.new_dir == mouse.old_dir){
 		switch(mouse.new_dir){
 			case 0:
-				lcd_filled_rectangle(mouse.posx, mouse.posy+sprites.mouse_im[mouse.new_dir].height, mouse.posx+sprites.mouse_im[mouse.new_dir].width, mouse.posy+sprites.mouse_im[mouse.new_dir].height+mouse.m, LCD_WHITE);
+				lcd_filled_rectangle(mouse.new_posx, mouse.new_posy+sprites.mouse_im[mouse.new_dir].height, mouse.new_posx+sprites.mouse_im[mouse.new_dir].width, mouse.new_posy+sprites.mouse_im[mouse.new_dir].height+mouse.m, LCD_WHITE);
 				break;
 			case 1:
-				lcd_filled_rectangle(mouse.posx-mouse.posx-sprites.mouse_im[mouse.new_dir].width-mouse.m, mouse.posy, mouse.posx+sprites.mouse_im[mouse.new_dir].width, mouse.posy+sprites.mouse_im[mouse.new_dir].height, LCD_WHITE);
+				lcd_filled_rectangle(mouse.new_posx-mouse.m, mouse.new_posy, mouse.new_posx, mouse.new_posy+sprites.mouse_im[mouse.new_dir].height, LCD_WHITE);
 				break;
 			case 2:
-				lcd_filled_rectangle(mouse.posx, mouse.posy-mouse.m,mouse.posx+sprites.mouse_im[mouse.new_dir].width,mouse.posy, LCD_WHITE);
+				lcd_filled_rectangle(mouse.new_posx, mouse.new_posy-mouse.m,mouse.new_posx+sprites.mouse_im[mouse.new_dir].width,mouse.new_posy, LCD_WHITE);
 				break;
 			case 3:
-				lcd_filled_rectangle(mouse.posx+sprites.mouse_im[mouse.new_dir].width,mouse.posy,mouse.posx+sprites.mouse_im[mouse.new_dir].width+mouse.m,mouse.posy+sprites.mouse_im[mouse.new_dir].height, LCD_WHITE);
+				lcd_filled_rectangle(mouse.new_posx+sprites.mouse_im[mouse.new_dir].width,mouse.new_posy,mouse.new_posx+sprites.mouse_im[mouse.new_dir].width+mouse.m,mouse.new_posy+sprites.mouse_im[mouse.new_dir].height, LCD_WHITE);
 				break;
 		}
 	}else{
-		lcd_filled_rectangle(mouse.posx, mouse.posy, mouse.posx+sprites.mouse_im[mouse.old_dir].width, mouse.posy+sprites.mouse_im[mouse.old_dir].height, LCD_WHITE);
+		lcd_filled_rectangle(mouse.old_posx, mouse.old_posy, mouse.old_posx+sprites.mouse_im[mouse.old_dir].width, mouse.old_posy+sprites.mouse_im[mouse.old_dir].height, LCD_WHITE);
 	}
 
 	mouse.m = (3*mouse.vitality+VITALITYMAX/2)/VITALITYMAX + 1;
 
 	if (joystick_get_state(JOYSTICK_LEFT)) {
-		mouse.posx-=mouse.m;
+		mouse.old_posx = mouse.new_posx;
+		mouse.new_posx-=mouse.m;
 		mouse.old_dir = mouse.new_dir;
 		mouse.new_dir = 3;
 	}else{
@@ -66,7 +70,8 @@ void task_mouse(sprites_t sprites){
 	}
 
 	if (joystick_get_state(JOYSTICK_RIGHT)) {
-		mouse.posx+=mouse.m;
+		mouse.old_posx = mouse.new_posx;
+		mouse.new_posx+=mouse.m;
 		mouse.old_dir = mouse.new_dir;
 		mouse.new_dir = 1;
 	}else{
@@ -74,7 +79,8 @@ void task_mouse(sprites_t sprites){
 	}
 
 	if (joystick_get_state(JOYSTICK_TOP)) {
-		mouse.posy-=mouse.m;
+		mouse.old_posy = mouse.new_posy;
+		mouse.new_posy-=mouse.m;
 		mouse.old_dir = mouse.new_dir;
 		mouse.new_dir = 0;
 	}else{
@@ -82,7 +88,8 @@ void task_mouse(sprites_t sprites){
 	}
 
 	if (joystick_get_state(JOYSTICK_BOTTOM)) {
-		mouse.posy+=mouse.m;
+		mouse.old_posy = mouse.new_posy;
+		mouse.new_posy+=mouse.m;
 		mouse.old_dir = mouse.new_dir;
 		mouse.new_dir = 2;
 	}else{
@@ -102,7 +109,7 @@ void task_mouse(sprites_t sprites){
 	}
 	mouse.not_moving = 0;
 
-	display_bitmap16(sprites.mouse_im[mouse.new_dir].bitmap, mouse.posx, mouse.posy, sprites.mouse_im[mouse.new_dir].width, sprites.mouse_im[mouse.new_dir].height);
+	display_bitmap16(sprites.mouse_im[mouse.new_dir].bitmap, mouse.new_posx, mouse.new_posy, sprites.mouse_im[mouse.new_dir].width, sprites.mouse_im[mouse.new_dir].height);
 
 }
 

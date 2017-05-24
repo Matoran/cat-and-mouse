@@ -21,8 +21,10 @@
 
 // structure for the mouse
 typedef struct {
-	int posx;
-	int posy;
+	int new_posx;
+	int new_posy;
+	int old_posx;
+	int old_posy;
 	int lenght;
 	int width;
 	int new_dir;
