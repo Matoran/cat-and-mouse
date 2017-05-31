@@ -94,6 +94,10 @@ void cat_move(){
 		EXIT("Fail to create DMA queue !");
 	};
 
+	if (catQueue = xQueueCreate( 10, sizeof(cat)) == NULL) {
+		EXIT("Fail to create DMA queue !");
+	};
+
 	init_dtmf();
 	init_cat();
 
