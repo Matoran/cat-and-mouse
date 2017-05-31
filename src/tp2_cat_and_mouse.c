@@ -62,13 +62,7 @@ int main(void)
 			EXIT("Not enough space to create image!");
 	init_traces(115200, 2, true);		// to be removed if you implement your own traces
 
-	for (i=0; i<3; i++)
-	{
-		display_bitmap16(sprites.cheese_im.bitmap, 28+80*i, 0, sprites.cheese_im.width, sprites.cheese_im.height);
-		lcd_filled_rectangle(30+80*i, 313, 30+12+80*i, 319, LCD_BLACK);		// mouse pits
-		lcd_filled_circle(30+6+80*i, 313, 6, LCD_BLACK);
-	}
-	lcd_empty_rectangle(219, 299, 233, 319, LCD_BLACK);						// empty gauge
+
 
 	lcd_print(20, 150, BIGFONT, LCD_BLACK, LCD_WHITE, "Bon travail!");
 

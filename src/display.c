@@ -18,4 +18,9 @@ void display(){
 	draw_vitality(mouse.vitality);
 	draw_mouse(mouse);
 	draw_cat(cat);
+	if(mouse touch cheese){
+
+	}
+	draw_cheeses();
+	draw_pits();
 }

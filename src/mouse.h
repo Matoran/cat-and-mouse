@@ -43,6 +43,7 @@ mouse_t mouse;
 
 void init_mouse(sprites_t sprites);
 void task_mouse(sprites_t sprites);
+void draw_mouse(mouse_t mouse);
 
 bool joystick_get_state(uint8_t pos);
 
