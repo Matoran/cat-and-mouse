@@ -18,6 +18,10 @@
 #define JOYSTICK_TOP	 20
 #define JOYSTICK_BOTTOM	 22
 #define VITALITYMAX 	 75
+#define NORTH			 0
+#define EAST			 1
+#define SOUTH			 2
+#define WEST			 3
 
 // structure for the mouse
 typedef struct {
@@ -29,9 +33,10 @@ typedef struct {
 	int width;
 	int new_dir;
 	int old_dir;
-	int not_moving;
 	int m;
 	int vitality;
+	int score;
+	bool moving;
 } mouse_t;
 
 mouse_t mouse;
