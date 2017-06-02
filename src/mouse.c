@@ -1,43 +1,36 @@
 /*
- * mouse.c
+ * mouse->c
  *
  *  Created on: 24 mai 2017
  *      Author: selement
  */
 #include "mouse.h"
 #include "lcd.h"
+#include "random.h"
+#include "define.h"
+#include "task.h"
 #include <stdio.h>
-#include <stdlib.h>
 
-void init_mouse(sprites_t sprites){
-	time_t t;
-	srand((unsigned) time(&t));
-	int pos_ale = rand() % 3;
+void init_mouse(mouse_t *mouse) {
+	int random_pos = randBetween(0, 2);
 	LPC_GPIO1->FIODIR &= ~(0b11111 << 19);
-	mouse.new_posx = pos_ale*80+34;
-	mouse.new_posy = 280;
-	mouse.old_posx = mouse.new_posx;
-	mouse.old_posy = mouse.new_posy;
-	mouse.new_dir = NORTH;
-	mouse.old_dir = NORTH;
-	mouse.moving = false;
-	mouse.vitality = VITALITYMAX;
-	mouse.m = 0;
-	mouse.score = 0;
-	display_bitmap16(sprites.mouse_im[mouse.new_dir].bitmap, mouse.new_posx, mouse.new_posy, sprites.mouse_im[mouse.new_dir].width, sprites.mouse_im[mouse.new_dir].height);
+	mouse->object.pos.x = random_pos * 80 + 34;
+	mouse->object.pos.y = 280;
+	mouse->object.dir = NORTH;
+	mouse->moving = false;
+	mouse->vitality = VITALITYMAX;
+	mouse->m = 0;
+	mouse->score = 0;
 }
 
-void reset_mouse(sprites_t sprites){
-	lcd_filled_rectangle(mouse.new_posx, mouse.new_posy, mouse.new_posx+sprites.mouse_im[mouse.new_dir].width, mouse.new_posy+sprites.mouse_im[mouse.new_dir].height, LCD_WHITE);
-	int pos_ale = rand() % 3;
-	mouse.old_posx = pos_ale*80+34;
-	mouse.old_posy = 280;
-	mouse.new_posx = pos_ale*80+34;
-	mouse.new_posy = 280;
-	mouse.new_dir = NORTH;
-	mouse.vitality = VITALITYMAX;
-	mouse.m = 0;
-	mouse.score++;
+void reset_mouse(mouse_t *mouse) {
+	int random_pos = randBetween(0, 2);
+	mouse->object.pos.x = random_pos * 80 + 34;
+	mouse->object.pos.y = 280;
+	mouse->object.dir = NORTH;
+	mouse->vitality = VITALITYMAX;
+	mouse->m = 0;
+	mouse->score++;
 }
 
 /***********************************
@@ -55,77 +48,100 @@ bool joystick_get_state(uint8_t pos) {
 	}
 }
 
-void task_mouse(sprites_t sprites){
-	if(mouse.new_dir == mouse.old_dir){
-		switch(mouse.new_dir){
-			case NORTH:
-				lcd_filled_rectangle(mouse.new_posx, mouse.new_posy+sprites.mouse_im[mouse.new_dir].height, mouse.old_posx+sprites.mouse_im[mouse.old_dir].width, mouse.old_posy+sprites.mouse_im[mouse.old_dir].height, LCD_WHITE);
-				break;
-			case EAST:
-				lcd_filled_rectangle(mouse.new_posx, mouse.new_posy, mouse.old_posx, mouse.old_posy+sprites.mouse_im[mouse.old_dir].height, LCD_WHITE);
-				break;
-			case SOUTH:
-				lcd_filled_rectangle(mouse.new_posx, mouse.new_posy, mouse.old_posx+sprites.mouse_im[mouse.old_dir].width,mouse.old_posy, LCD_WHITE);
-				break;
-			case WEST:
-				lcd_filled_rectangle(mouse.new_posx+sprites.mouse_im[mouse.old_dir].width,mouse.new_posy,mouse.old_posx+sprites.mouse_im[mouse.old_dir].width+mouse.m,mouse.old_posy+sprites.mouse_im[mouse.old_dir].height, LCD_WHITE);
-				break;
+void draw_mouse(mouse_t *old, mouse_t *new, sprites_t *sprites) {
+	if (new->object.dir == old->object.dir) {
+
+		switch (new->object.dir) {
+		case NORTH:
+			lcd_filled_rectangle(
+					new->object.pos.x,
+					new->object.pos.y + sprites->mouse_im[new->object.dir].height,
+					old->object.pos.x + sprites->mouse_im[old->object.dir].width,
+					old->object.pos.y + sprites->mouse_im[old->object.dir].height,
+					LCD_WHITE);
+			break;
+		case EAST:
+			lcd_filled_rectangle(
+					new->object.pos.x,
+					new->object.pos.y,
+					old->object.pos.x,
+					old->object.pos.y + sprites->mouse_im[old->object.dir].height,
+					LCD_WHITE);
+			break;
+		case SOUTH:
+			lcd_filled_rectangle(
+					new->object.pos.x,
+					new->object.pos.y,
+					old->object.pos.x + sprites->mouse_im[old->object.dir].width,
+					old->object.pos.y,
+					LCD_WHITE);
+			break;
+		case WEST:
+			lcd_filled_rectangle(
+					new->object.pos.x + sprites->mouse_im[old->object.dir].width,
+					new->object.pos.y,
+					old->object.pos.x + sprites->mouse_im[old->object.dir].width,
+					old->object.pos.y + sprites->mouse_im[old->object.dir].height,
+					LCD_WHITE);
+			break;
 		}
-	}else{
-		lcd_filled_rectangle(mouse.old_posx, mouse.old_posy, mouse.old_posx+sprites.mouse_im[mouse.old_dir].width, mouse.old_posy+sprites.mouse_im[mouse.old_dir].height, LCD_WHITE);
+	} else {
+		lcd_filled_rectangle(
+				old->object.pos.x,
+				old->object.pos.y,
+				old->object.pos.x + sprites->mouse_im[old->object.dir].width,
+				old->object.pos.y + sprites->mouse_im[old->object.dir].height,
+				LCD_WHITE);
 	}
 
-	mouse.m = (3*mouse.vitality+VITALITYMAX/2)/VITALITYMAX + 1;
-
-	mouse.moving = true;
-	if (joystick_get_state(JOYSTICK_LEFT)) {
-		if(mouse.new_posx - mouse.m > 0){
-			mouse.old_posx = mouse.new_posx;
-			mouse.new_posx-=mouse.m;
-		}
-		mouse.old_dir = mouse.new_dir;
-		mouse.new_dir = WEST;
-	}else if (joystick_get_state(JOYSTICK_RIGHT)) {
-		if(mouse.new_posx + mouse.m + sprites.mouse_im[mouse.new_dir].width < 239){
-			mouse.old_posx = mouse.new_posx;
-			mouse.new_posx+=mouse.m;
-		}
-		mouse.old_dir = mouse.new_dir;
-		mouse.new_dir = EAST;
-	}else if (joystick_get_state(JOYSTICK_TOP)) {
-		if(mouse.new_posy - mouse.m > 26){
-			mouse.old_posy = mouse.new_posy;
-			mouse.new_posy-=mouse.m;
-		}else{
-			reset_mouse(sprites);
-		}
-		mouse.old_dir = mouse.new_dir;
-		mouse.new_dir = NORTH;
-	}else if (joystick_get_state(JOYSTICK_BOTTOM)) {
-		if(mouse.new_posy + mouse.m < 280){
-			mouse.old_posy = mouse.new_posy;
-			mouse.new_posy+=mouse.m;
-		}
-		mouse.old_dir = mouse.new_dir;
-		mouse.new_dir = SOUTH;
-	}else{
-		mouse.moving = false;
-	}
-
-	if(!mouse.moving){
-		if(mouse.vitality < VITALITYMAX){
-			mouse.vitality++;
-			lcd_filled_rectangle(220, 319-mouse.vitality*20/VITALITYMAX, 231, 319, LCD_GREEN);
-		}
-	}else{
-		if(mouse.vitality > 0){
-			lcd_filled_rectangle(220, 318-mouse.vitality*20/75, 231, (318-mouse.vitality*20/75)+1, LCD_WHITE);
-			mouse.vitality--;
-		}
-	}
-
-	display_bitmap16(sprites.mouse_im[mouse.new_dir].bitmap, mouse.new_posx, mouse.new_posy, sprites.mouse_im[mouse.new_dir].width, sprites.mouse_im[mouse.new_dir].height);
+	display_bitmap16(sprites->mouse_im[new->object.dir].bitmap, new->object.pos.x,
+			new->object.pos.y, sprites->mouse_im[new->object.dir].width,
+			sprites->mouse_im[new->object.dir].height);
 }
 
+void task_mouse(void *param) {
 
+	sprites_t *sprites = (sprites_t*)param;
+	mouse_t mouse;
+	init_mouse(&mouse);
+	portTickType xLastWakeTime = xTaskGetTickCount();
+	while (1) {
+		vTaskDelayUntil(&xLastWakeTime, 20 / portTICK_RATE_MS);
+		mouse.m = (3 * mouse.vitality + VITALITYMAX / 2) / VITALITYMAX + 1;
+		mouse.moving = true;
+		if (joystick_get_state(JOYSTICK_LEFT)) {
+			if (mouse.object.pos.x - mouse.m > 0) {
+				mouse.object.pos.x -= mouse.m;
+			}
+			mouse.object.dir = WEST;
+		} else if (joystick_get_state(JOYSTICK_RIGHT)) {
+			if (mouse.object.pos.x + mouse.m
+					+ sprites->mouse_im[mouse.object.dir].width < 239) {
+				mouse.object.pos.x += mouse.m;
+			}
+			mouse.object.dir = EAST;
+		} else if (joystick_get_state(JOYSTICK_TOP)) {
+			if (mouse.object.pos.y - mouse.m > 26) {
+				mouse.object.pos.y -= mouse.m;
+			} else {
+				reset_mouse(&mouse);
+			}
+			mouse.object.dir = NORTH;
+		} else if (joystick_get_state(JOYSTICK_BOTTOM)) {
+			if (mouse.object.pos.y + mouse.m < 280) {
+				mouse.object.pos.y += mouse.m;
+			}
+			mouse.object.dir = SOUTH;
+		} else {
+			mouse.moving = false;
+		}
+
+		if (!mouse.moving && mouse.vitality < VITALITYMAX) {
+			mouse.vitality++;
+		} else if (mouse.moving && mouse.vitality > 0) {
+			mouse.vitality--;
+		}
+		xQueueSend(mouseQueue, ( void * ) &mouse, (portTickType) 0);
+	}
+}
 

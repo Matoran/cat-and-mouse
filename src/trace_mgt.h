@@ -12,5 +12,5 @@
 /* uses timer 2 */
 void init_traces();
 void write_trace(uint8_t sig_idx, short val);
-
+void task_traces();
 #endif

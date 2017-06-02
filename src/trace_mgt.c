@@ -29,8 +29,14 @@ void write_trace(uint8_t trace_id, short val)
 // note that portSET_INTERRUPT_MASK() and portCLEAR_INTERRUPT_MASK() can be used
 // to protect critical sections if any. Do not use mutexes here, they have no effect!
 
-/*void vApplicationIdleHook( void )
+void vApplicationIdleHook( void )
 {
 
-}*/
+}
+
+void task_traces(){
+	//while(1){
+
+	//}
+}
 
