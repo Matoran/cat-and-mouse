@@ -10,6 +10,6 @@
 
 #include "objects.h"
 
-void display(sprites_t *sprites);
+void task_display(void *param);
 
 #endif /* DISPLAY_H_ */

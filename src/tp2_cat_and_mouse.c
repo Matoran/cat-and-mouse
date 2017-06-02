@@ -6,7 +6,6 @@
  */
 
 #include <cr_section_macros.h>
-#include <dtmf_detection.h>
 #include <ethmac.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,6 +18,11 @@
 #include "debug.h"
 #include "trace_mgt.h"
 #include "objects.h"
+#include "mouse.h"
+#include "dtmf_detection.h"
+#include "display.h"
+#include "cat.h"
+
 
 
 
@@ -62,12 +66,29 @@ int main(void)
 			EXIT("Not enough space to create image!");
 	init_traces(115200, 2, true);		// to be removed if you implement your own traces
 
-
+	mouseQueue = xQueueCreate(1, sizeof(mouse_t));
+	if(mouseQueue == 0){
+		EXIT("Failed to create mouse queue!");
+	}
+	catQueue = xQueueCreate(1, sizeof(cat_t));
+	if(catQueue == 0){
+			EXIT("Failed to create cat queue!");
+	}
 
 	lcd_print(20, 150, BIGFONT, LCD_BLACK, LCD_WHITE, "Bon travail!");
 
-	init_dtmf();
+	//init_dtmf();
 
-	while(1);
+	if (xTaskCreate(task_mouse, (signed portCHAR *)"mouse", configMINIMAL_STACK_SIZE, &sprites, 1, NULL) != pdPASS) {
+		while (1);
+	}
+	if (xTaskCreate(task_cat, (signed portCHAR *)"cat", configMINIMAL_STACK_SIZE, NULL, 1, NULL) != pdPASS) {
+		while (1);
+	}
+	if (xTaskCreate(task_display, (signed portCHAR *)"display", configMINIMAL_STACK_SIZE, &sprites, 1, NULL) != pdPASS) {
+		while (1);
+	}
+	vTaskStartScheduler();
+
 	return 1;
 }

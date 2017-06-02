@@ -25,25 +25,18 @@
 
 // structure for the mouse
 typedef struct {
-	int new_posx;
-	int new_posy;
-	int old_posx;
-	int old_posy;
+	object_t object;
 	int lenght;
 	int width;
-	int new_dir;
-	int old_dir;
 	int m;
 	int vitality;
 	int score;
 	bool moving;
 } mouse_t;
 
-mouse_t mouse;
-
-void init_mouse(mouse_t *mouse, sprites_t *sprites);
-void task_mouse(sprites_t *sprites);
-void draw_mouse(mouse_t *mouse, sprites_t *sprites);
+void init_mouse(mouse_t *mouse);
+void task_mouse(void *param);
+void draw_mouse(mouse_t *old, mouse_t *new, sprites_t *sprites);
 
 bool joystick_get_state(uint8_t pos);
 

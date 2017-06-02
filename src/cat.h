@@ -8,6 +8,9 @@
 #ifndef CAT_H_
 #define CAT_H_
 
-void draw_cat();
+#include "dtmf_detection.h"
+
+void draw_cat(cat_t *old, cat_t *new, sprites_t *sprites);
+void task_cat(void *param);
 
 #endif /* CAT_H_ */
