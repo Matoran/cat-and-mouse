@@ -8,6 +8,8 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 
-void display();
+#include "objects.h"
+
+void display(sprites_t *sprites);
 
 #endif /* DISPLAY_H_ */

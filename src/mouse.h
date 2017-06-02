@@ -41,9 +41,9 @@ typedef struct {
 
 mouse_t mouse;
 
-void init_mouse(sprites_t sprites);
-void task_mouse(sprites_t sprites);
-void draw_mouse(mouse_t mouse);
+void init_mouse(mouse_t *mouse, sprites_t *sprites);
+void task_mouse(sprites_t *sprites);
+void draw_mouse(mouse_t *mouse, sprites_t *sprites);
 
 bool joystick_get_state(uint8_t pos);
 

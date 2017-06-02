@@ -8,8 +8,11 @@
 #ifndef DEFINE_H_
 #define DEFINE_H_
 
-extern QueueHandle_t mouseQueue;
-extern QueueHandle_t catQueue;
+#include "FreeRTOS.h"
+#include "queue.h"
+
+extern xQueueHandle mouseQueue;
+extern xQueueHandle catQueue;
 
 #define MAX_POS_X 239
 #define MAX_POS_Y 299
