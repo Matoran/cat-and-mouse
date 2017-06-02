@@ -1,4 +1,4 @@
 #include "define.h"
 
-QueueHandle_t mouseQueue;
-QueueHandle_t catQueue;
+xQueueHandle mouseQueue;
+xQueueHandle catQueue;
