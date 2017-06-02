@@ -11,4 +11,7 @@
 extern QueueHandle_t mouseQueue;
 extern QueueHandle_t catQueue;
 
+#define MAX_POS_X 239
+#define MAX_POS_Y 299
+
 #endif /* DEFINE_H_ */
