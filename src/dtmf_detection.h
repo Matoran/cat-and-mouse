@@ -14,17 +14,11 @@ typedef struct cat_t{
 	int posY;
 	int direction;
 	int oldPosX;
-	int oldPoxY;
+	int oldPosY;
 	int oldDirection;
 }cat_t;
 
-typedef enum Direction Direction;
-enum Direction
-{
-    NORTH, EAST, SOUTH,WEST
-};
-
-void init_dtmf();
+unsigned short* init_dtmf();
 dir_t read_dtmf(int buf_idx);
 
 #endif

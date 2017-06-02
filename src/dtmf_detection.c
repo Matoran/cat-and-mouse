@@ -8,7 +8,8 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdbool.h>
-#include <queue.h>
+#include "FreeRTOS.h"
+#include "queue.h"
 #include "adc.h"
 #include "debug.h"
 #include "objects.h"
@@ -21,7 +22,7 @@
 #define STEP 2
 #define abs1(x) ((x<0)?(-x):x)
 
-QueueHandle_t xQueue;
+xQueueHandle xQueue;
 
 bool check_freq(uint16_t* buf, uint16_t freq){
 	double w;
@@ -68,7 +69,7 @@ int direction (uint16_t* buf){
 // buf_index: 0 or 1, indicating which buffer is full
 void buffer_filled(int buf_index)
 {
-	xQueueSendToBack(xQeue, &buf_index, portMAX_DELAY);
+	xQueueSendToBack(xQueue, &buf_index, portMAX_DELAY);
 }
 
 // Initialise the reception of the sound samples
@@ -79,6 +80,7 @@ unsigned short* init_dtmf()
 	// The return pointer points on the the double buffer allocated.
 	if ((sig=init_adc_dma(1, FE, BUF_SIZE, buffer_filled))==NULL)
 		EXIT("Not enough memory to allocate acquisition buffers!");
+	return sig;
 }
 
 cat_t init_cat(){
@@ -86,30 +88,31 @@ cat_t init_cat(){
 	cat.posX = 110;
 	cat.oldPosX = cat.posX;
 	cat.posY = 30;
-	cat.oldPoxY = cat.posY;
+	cat.oldPosY = cat.posY;
 	cat.direction = SOUTH;
+	return cat;
 }
 
 void cat_move(){
-	if (xQueue = xQueueCreate( 1, sizeof(int)) == NULL) {
+	if ((xQueue = xQueueCreate( 1, sizeof(int))) == NULL) {
 		EXIT("Fail to create DMA queue !");
 	};
 
-	if (catQueue = xQueueCreate( 10, sizeof(cat)) == NULL) {
+	if ((catQueue = xQueueCreate( 10, sizeof(cat_t))) == NULL) {
 		EXIT("Fail to create DMA queue !");
 	};
 
 	init_dtmf();
 	cat_t cat = init_cat();
 
-	int pos;
+	//int pos;
 	int buf;
 	unsigned short *buf1 = init_dtmf();
-	unsigned short *buf2 = *buf1 + BUF_SIZE;
+	unsigned short *buf2 = buf1 + BUF_SIZE;
 
 	while(1){
 
-		xQeueReceive(xQeue, &buf,portMAX_DELAY);
+		xQueueReceive(xQueue, &buf,portMAX_DELAY);
 
 		if (buf == 0) {
 			cat.direction = direction(buf1);
@@ -118,40 +121,40 @@ void cat_move(){
 		}
 
 		if (((cat.oldDirection == NORTH)||(cat.oldDirection == SOUTH)) && ((cat.direction == WEST)||(cat.direction == EAST))) {
-			cat.posX += ;
+			/*cat.posX += ;
 			cat.oldPosX += ;
 			cat.posY += ;
-			cat.oldPoxY += ;
+			cat.oldPoxY += ;*/
 		}else if (((cat.oldDirection == WEST)||(cat.oldDirection == EAST)) && ((cat.direction == NORTH)||(cat.direction == SOUTH))) {
-			cat.posX += ;
+			/*cat.posX += ;
 			cat.oldPosX += ;
 			cat.posY += ;
-			cat.oldPoxY += ;
+			cat.oldPoxY += ;*/
 		}
 
 		switch (cat.direction) {
 			case NORTH:
 				cat.posY = cat.oldPosY - STEP;
 				if (cat.posY < 26) {
-					cat.posY = cat.oldPoxY;
+					cat.posY = cat.oldPosY;
 				}
 				break;
 			case EAST:
-				cat.posX = cat.oldPoxX + STEP;
+				cat.posX = cat.oldPosX + STEP;
 				if (cat.posY > MAX_POS_X-48) {
-					cat.posY = cat.oldPoxY;
+					cat.posY = cat.oldPosY;
 				}
 				break;
 			case SOUTH:
-				cat.posY = cat.oldPoxY + STEP;
+				cat.posY = cat.oldPosY + STEP;
 				if (cat.posY > 252-48) {
-					cat.posY = cat.oldPoxY;
+					cat.posY = cat.oldPosY;
 				}
 				break;
 			case WEST:
 				cat.posX = cat.oldPosX - STEP;
 				if (cat.posX < 0) {
-					cat.posX = cat.oldPoxX;
+					cat.posX = cat.oldPosX;
 				}
 				break;
 			default:
