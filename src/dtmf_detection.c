@@ -15,9 +15,10 @@
 #include "dtmf_detection.h"
 
 #define BUF_SIZE 400
-#define LIMIT_DETEC 120000
+#define LIMIT_DETEC 10000
 #define FE 8000.
 #define PI 3.14159265359
+#define STEP 2
 #define abs1(x) ((x<0)?(-x):x)
 
 QueueHandle_t xQueue;
@@ -29,7 +30,7 @@ bool check_freq(uint16_t* buf, uint16_t freq){
 	sum.re = 0;
 
 	for (int i = 0; i < BUF_SIZE - 1; ++i) {
-		w = (2*PI*(852)*i)*PI/180;
+		w = (2*PI*(852/FE)*i)*PI/180;
 		sum.im += buf[i] * sinf(w-BUF_SIZE);
 		sum.re += buf[i] * cosf(w-BUF_SIZE);
 	}
@@ -71,7 +72,7 @@ void buffer_filled(int buf_index)
 }
 
 // Initialise the reception of the sound samples
-void init_dtmf()
+unsigned short* init_dtmf()
 {
 	unsigned short *sig; // pointer on acquisition double buffer
 	// initialise DMA&ADC to receive samples from the audio line at 8000 kHz.
@@ -80,7 +81,7 @@ void init_dtmf()
 		EXIT("Not enough memory to allocate acquisition buffers!");
 }
 
-void init_cat(){
+cat_t init_cat(){
 	cat_t cat;
 	cat.posX = 110;
 	cat.oldPosX = cat.posX;
@@ -99,22 +100,64 @@ void cat_move(){
 	};
 
 	init_dtmf();
-	init_cat();
+	cat_t cat = init_cat();
 
 	int pos;
 	int buf;
-	unsigned short *buf1 = *sig;
-	unsigned short *buf2 = *sig + BUF_SIZE;
+	unsigned short *buf1 = init_dtmf();
+	unsigned short *buf2 = *buf1 + BUF_SIZE;
 
 	while(1){
 
 		xQeueReceive(xQeue, &buf,portMAX_DELAY);
 
 		if (buf == 0) {
-			pos = direction(buf1);
+			cat.direction = direction(buf1);
 		}else if (buf == 1){
-			 pos = direction(buf2);
+			cat.direction = direction(buf2);
 		}
+
+		if (((cat.oldDirection == NORTH)||(cat.oldDirection == SOUTH)) && ((cat.direction == WEST)||(cat.direction == EAST))) {
+			cat.posX += ;
+			cat.oldPosX += ;
+			cat.posY += ;
+			cat.oldPoxY += ;
+		}else if (((cat.oldDirection == WEST)||(cat.oldDirection == EAST)) && ((cat.direction == NORTH)||(cat.direction == SOUTH))) {
+			cat.posX += ;
+			cat.oldPosX += ;
+			cat.posY += ;
+			cat.oldPoxY += ;
+		}
+
+		switch (cat.direction) {
+			case NORTH:
+				cat.posY = cat.oldPosY - STEP;
+				if (cat.posY < 26) {
+					cat.posY = cat.oldPoxY;
+				}
+				break;
+			case EAST:
+				cat.posX = cat.oldPoxX + STEP;
+				if (cat.posY > MAX_POS_X-48) {
+					cat.posY = cat.oldPoxY;
+				}
+				break;
+			case SOUTH:
+				cat.posY = cat.oldPoxY + STEP;
+				if (cat.posY > 252-48) {
+					cat.posY = cat.oldPoxY;
+				}
+				break;
+			case WEST:
+				cat.posX = cat.oldPosX - STEP;
+				if (cat.posX < 0) {
+					cat.posX = cat.oldPoxX;
+				}
+				break;
+			default:
+				break;
+		}
+
 
 		xQueueSendToBack(catQueue, &cat, portMAX_DELAY);
 

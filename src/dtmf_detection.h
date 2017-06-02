@@ -15,6 +15,7 @@ typedef struct cat_t{
 	int direction;
 	int oldPosX;
 	int oldPoxY;
+	int oldDirection;
 }cat_t;
 
 typedef enum Direction Direction;

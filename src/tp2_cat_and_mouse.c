@@ -66,7 +66,7 @@ int main(void)
 
 	lcd_print(20, 150, BIGFONT, LCD_BLACK, LCD_WHITE, "Bon travail!");
 
-	// init_dtmf();
+	init_dtmf();
 
 	while(1);
 	return 1;
