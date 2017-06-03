@@ -19,10 +19,9 @@
 #define LIMIT_DETEC 10000
 #define FE 8000.
 #define PI 3.14159265359
-#define STEP 2
 #define abs1(x) ((x<0)?(-x):x)
 
-xQueueHandle xQueue;
+
 
 bool check_freq(uint16_t* buf, uint16_t freq){
 	double w;
@@ -81,84 +80,4 @@ unsigned short* init_dtmf()
 	if ((sig=init_adc_dma(1, FE, BUF_SIZE, buffer_filled))==NULL)
 		EXIT("Not enough memory to allocate acquisition buffers!");
 	return sig;
-}
-
-cat_t init_cat(){
-	cat_t cat;
-	cat.posX = 110;
-	cat.oldPosX = cat.posX;
-	cat.posY = 30;
-	cat.oldPosY = cat.posY;
-	cat.direction = SOUTH;
-	return cat;
-}
-
-void cat_move(){
-	if ((xQueue = xQueueCreate( 1, sizeof(int))) == 0) {
-		EXIT("Fail to create DMA queue !");
-	};
-
-	//init_dtmf();
-	cat_t cat = init_cat();
-
-	//int pos;
-	int buf;
-	unsigned short *buf1 = init_dtmf();
-	unsigned short *buf2 = buf1 + BUF_SIZE;
-
-	while(1){
-
-		xQueueReceive(xQueue, &buf,portMAX_DELAY);
-
-		if (buf == 0) {
-			cat.direction = direction(buf1);
-		}else if (buf == 1){
-			cat.direction = direction(buf2);
-		}
-
-		if (((cat.oldDirection == NORTH)||(cat.oldDirection == SOUTH)) && ((cat.direction == WEST)||(cat.direction == EAST))) {
-			/*cat.posX += ;
-			cat.oldPosX += ;
-			cat.posY += ;
-			cat.oldPoxY += ;*/
-		}else if (((cat.oldDirection == WEST)||(cat.oldDirection == EAST)) && ((cat.direction == NORTH)||(cat.direction == SOUTH))) {
-			/*cat.posX += ;
-			cat.oldPosX += ;
-			cat.posY += ;
-			cat.oldPoxY += ;*/
-		}
-
-		switch (cat.direction) {
-			case NORTH:
-				cat.posY = cat.oldPosY - STEP;
-				if (cat.posY < 26) {
-					cat.posY = cat.oldPosY;
-				}
-				break;
-			case EAST:
-				cat.posX = cat.oldPosX + STEP;
-				if (cat.posY > MAX_POS_X-48) {
-					cat.posY = cat.oldPosY;
-				}
-				break;
-			case SOUTH:
-				cat.posY = cat.oldPosY + STEP;
-				if (cat.posY > 252-48) {
-					cat.posY = cat.oldPosY;
-				}
-				break;
-			case WEST:
-				cat.posX = cat.oldPosX - STEP;
-				if (cat.posX < 0) {
-					cat.posX = cat.oldPosX;
-				}
-				break;
-			default:
-				break;
-		}
-
-
-		xQueueSendToBack(catQueue, &cat, portMAX_DELAY);
-
-	}
 }

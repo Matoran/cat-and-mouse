@@ -9,15 +9,6 @@ typedef struct complex{
 	float im;
 }complex;
 
-typedef struct cat_t{
-	int posX;
-	int posY;
-	int direction;
-	int oldPosX;
-	int oldPosY;
-	int oldDirection;
-}cat_t;
-
 unsigned short* init_dtmf();
 dir_t read_dtmf(int buf_idx);
 
