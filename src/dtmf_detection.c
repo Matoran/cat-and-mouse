@@ -86,9 +86,7 @@ unsigned short* init_dtmf()
 cat_t init_cat(){
 	cat_t cat;
 	cat.posX = 110;
-	cat.oldPosX = cat.posX;
 	cat.posY = 30;
-	cat.oldPosY = cat.posY;
 	cat.direction = SOUTH;
 	return cat;
 }
@@ -115,49 +113,41 @@ void cat_move(){
 		xQueueReceive(xQueue, &buf,portMAX_DELAY);
 
 		if (buf == 0) {
+			cat.oldDirection = cat.direction;
 			cat.direction = direction(buf1);
 		}else if (buf == 1){
+			cat.oldDirection = cat.direction;
 			cat.direction = direction(buf2);
 		}
 
 		if (((cat.oldDirection == NORTH)||(cat.oldDirection == SOUTH)) && ((cat.direction == WEST)||(cat.direction == EAST))) {
-			/*cat.posX += ;
-			cat.oldPosX += ;
-			cat.posY += ;
-			cat.oldPoxY += ;*/
+			cat.posX -= 16;
+			cat.posY -= 16;
 		}else if (((cat.oldDirection == WEST)||(cat.oldDirection == EAST)) && ((cat.direction == NORTH)||(cat.direction == SOUTH))) {
-			/*cat.posX += ;
-			cat.oldPosX += ;
-			cat.posY += ;
-			cat.oldPoxY += ;*/
+			cat.posX += 16;
+			cat.posY += 16;
 		}
 
 		switch (cat.direction) {
 			case NORTH:
-				cat.posY = cat.oldPosY - STEP;
-				if (cat.posY < 26) {
-					cat.posY = cat.oldPosY;
+				if (cat.posY - STEP > 26) {
+					cat.posY -= STEP;
 				}
 				break;
 			case EAST:
-				cat.posX = cat.oldPosX + STEP;
-				if (cat.posY > MAX_POS_X-48) {
-					cat.posY = cat.oldPosY;
+				if (cat.posX + STEP < MAX_POS_X-48) {
+					cat.posX += STEP;
 				}
 				break;
 			case SOUTH:
-				cat.posY = cat.oldPosY + STEP;
-				if (cat.posY > 252-48) {
-					cat.posY = cat.oldPosY;
+				if (cat.posY + STEP < 252-48) {
+					cat.posY += STEP;
 				}
 				break;
 			case WEST:
-				cat.posX = cat.oldPosX - STEP;
-				if (cat.posX < 0) {
-					cat.posX = cat.oldPosX;
+				if (cat.posX - STEP > 0) {
+					cat.posX -= STEP;
 				}
-				break;
-			default:
 				break;
 		}
 

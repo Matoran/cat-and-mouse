@@ -13,8 +13,6 @@ typedef struct cat_t{
 	int posX;
 	int posY;
 	int direction;
-	int oldPosX;
-	int oldPosY;
 	int oldDirection;
 }cat_t;
 
