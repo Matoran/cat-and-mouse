@@ -13,30 +13,25 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-void draw_cat(cat_t *old, cat_t *new, sprites_t *sprites){
+void draw_cat(cat_t *old, cat_t *new, sprites_t *sprites) {
 	if (new->object.dir == old->object.dir) {
 
 		switch (new->object.dir) {
 		case NORTH:
-			lcd_filled_rectangle(
-					new->object.pos.x,
+			lcd_filled_rectangle(new->object.pos.x,
 					new->object.pos.y + sprites->cat_im[new->object.dir].height,
 					old->object.pos.x + sprites->cat_im[old->object.dir].width,
 					old->object.pos.y + sprites->cat_im[old->object.dir].height,
 					LCD_WHITE);
 			break;
 		case EAST:
-			lcd_filled_rectangle(
-					new->object.pos.x,
-					new->object.pos.y,
+			lcd_filled_rectangle(new->object.pos.x, new->object.pos.y,
 					old->object.pos.x,
 					old->object.pos.y + sprites->cat_im[old->object.dir].height,
 					LCD_WHITE);
 			break;
 		case SOUTH:
-			lcd_filled_rectangle(
-					new->object.pos.x,
-					new->object.pos.y,
+			lcd_filled_rectangle(new->object.pos.x, new->object.pos.y,
 					old->object.pos.x + sprites->cat_im[old->object.dir].width,
 					old->object.pos.y,
 					LCD_WHITE);
@@ -51,9 +46,7 @@ void draw_cat(cat_t *old, cat_t *new, sprites_t *sprites){
 			break;
 		}
 	} else {
-		lcd_filled_rectangle(
-				old->object.pos.x,
-				old->object.pos.y,
+		lcd_filled_rectangle(old->object.pos.x, old->object.pos.y,
 				old->object.pos.x + sprites->cat_im[old->object.dir].width,
 				old->object.pos.y + sprites->cat_im[old->object.dir].height,
 				LCD_WHITE);
@@ -64,138 +57,144 @@ void draw_cat(cat_t *old, cat_t *new, sprites_t *sprites){
 			sprites->cat_im[new->object.dir].height);
 }
 
-void init_cat(cat_t *cat){
+void init_cat(cat_t *cat) {
 	cat->object.pos.x = 110;
 	cat->object.pos.y = 30;
 	cat->object.dir = SOUTH;
 }
 
-void task_cat(void *param){
+void task_cat(void *param) {
+	sprites_t *sprites = (sprites_t*) param;
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	cat_t cat;
 	init_cat(&cat);
 	int old_direction = cat.object.dir;
-	while(1){
+	int x = (sprites->cat_im[WEST].width - sprites->cat_im[NORTH].width) / 2;
+	int y = (sprites->cat_im[NORTH].height - sprites->cat_im[WEST].height) / 2;
+	;
+	while (1) {
 		vTaskDelayUntil(&xLastWakeTime, 50 / portTICK_RATE_MS);
-
+		old_direction = cat.object.dir;
 
 		if (joystick_get_state(JOYSTICK_LEFT)) {
-			old_direction = cat.object.dir;
 			cat.object.dir = WEST;
+			if (old_direction == NORTH || old_direction == SOUTH) {
+				cat.object.pos.x -= x;
+				cat.object.pos.y += y;
+			}
 			if (cat.object.pos.x - STEP_CAT > 0) {
 				cat.object.pos.x -= STEP_CAT;
 			}
-		}else if (joystick_get_state(JOYSTICK_RIGHT)) {
-			old_direction = cat.object.dir;
+		} else if (joystick_get_state(JOYSTICK_RIGHT)) {
 			cat.object.dir = EAST;
-			if (cat.object.pos.x + STEP_CAT < MAX_POS_X-48) {
+			if (old_direction == NORTH || old_direction == SOUTH) {
+				cat.object.pos.x -= x;
+				cat.object.pos.y += y;
+			}
+			if (cat.object.pos.x + STEP_CAT < MAX_POS_X - 48) {
 				cat.object.pos.x += STEP_CAT;
 			}
-		}else if (joystick_get_state(JOYSTICK_TOP)) {
-			old_direction = cat.object.dir;
+		} else if (joystick_get_state(JOYSTICK_TOP)) {
 			cat.object.dir = NORTH;
+			if (old_direction == WEST || old_direction == EAST) {
+				cat.object.pos.x += x;
+				cat.object.pos.y -= y;
+			}
 			if (cat.object.pos.y - STEP_CAT > 26) {
 				cat.object.pos.y -= STEP_CAT;
 			}
-		}else if (joystick_get_state(JOYSTICK_BOTTOM)) {
-			old_direction = cat.object.dir;
+		} else if (joystick_get_state(JOYSTICK_BOTTOM)) {
 			cat.object.dir = SOUTH;
-			if (cat.object.pos.y + STEP_CAT < 252-48) {
+			if (old_direction == WEST || old_direction == EAST) {
+				cat.object.pos.x += x;
+				cat.object.pos.y -= y;
+			}
+			if (cat.object.pos.y + STEP_CAT < 252 - 48) {
 				cat.object.pos.y += STEP_CAT;
 			}
 		}
 
-		if (((old_direction == NORTH)||(old_direction == SOUTH)) && ((cat.object.dir == WEST)||(cat.object.dir == EAST))) {
-			cat.object.pos.x -= 16;
-			cat.object.pos.y += 16;
-		}else if (((old_direction == WEST)||(old_direction == EAST)) && ((cat.object.dir == NORTH)||(cat.object.dir == SOUTH))) {
-			cat.object.pos.x += 16;
-			cat.object.pos.y -= 16;
-		}
-
-		xQueueSend(catQueue, ( void * ) &cat, (portTickType) 0);
+		xQueueSend(catQueue, (void * ) &cat, (portTickType ) 0);
 	}
 }
 
 //void cat_move(){
 
+//init_dtmf();
+//cat_t cat = init_cat();
 
-	//init_dtmf();
-	//cat_t cat = init_cat();
+//int pos;
+/*int buf;
+ unsigned short *buf1 = init_dtmf();
+ unsigned short *buf2 = buf1 + BUF_SIZE;*/
 
-	//int pos;
-	/*int buf;
-	unsigned short *buf1 = init_dtmf();
-	unsigned short *buf2 = buf1 + BUF_SIZE;*/
+//while(1){
+/*xQueueReceive(xQueue, &buf,portMAX_DELAY);
 
-	//while(1){
+ if (buf == 0) {
+ cat.oldDirection = cat.direction;
+ cat.direction = direction(buf1);
+ }else if (buf == 1){
+ cat.oldDirection = cat.direction;
+ cat.direction = direction(buf2);
+ }*/
 
-		/*xQueueReceive(xQueue, &buf,portMAX_DELAY);
+/*if (joystick_get_state(JOYSTICK_LEFT)) {
+ cat.oldDirection = cat.direction;
+ cat.direction = WEST;
+ if (cat.object.pos.x - STEP_CAT > 0) {
+ cat.object.pos.x -= STEP_CAT;
+ }
+ }else if (joystick_get_state(JOYSTICK_RIGHT)) {
+ cat.oldDirection = cat.direction;
+ cat.direction = EAST;
+ if (cat.object.pos.x + STEP_CAT < MAX_POS_X-48) {
+ cat.object.pos.x += STEP_CAT;
+ }
+ }else if (joystick_get_state(JOYSTICK_TOP)) {
+ cat.oldDirection = cat.direction;
+ cat.direction = NORTH;
+ if (cat.object.pos.y - STEP_CAT > 26) {
+ cat.object.pos.y -= STEP_CAT;
+ }
+ }else if (joystick_get_state(JOYSTICK_BOTTOM)) {
+ cat.oldDirection = cat.direction;
+ cat.direction = SOUTH;
+ if (cat.object.pos.y + STEP_CAT < 252-48) {
+ cat.object.pos.y += STEP_CAT;
+ }
+ }
 
-		if (buf == 0) {
-			cat.oldDirection = cat.direction;
-			cat.direction = direction(buf1);
-		}else if (buf == 1){
-			cat.oldDirection = cat.direction;
-			cat.direction = direction(buf2);
-		}*/
+ if (((cat.oldDirection == NORTH)||(cat.oldDirection == SOUTH)) && ((cat.direction == WEST)||(cat.direction == EAST))) {
+ cat.object.pos.x -= 16;
+ cat.object.pos.y -= 16;
+ }else if (((cat.oldDirection == WEST)||(cat.oldDirection == EAST)) && ((cat.direction == NORTH)||(cat.direction == SOUTH))) {
+ cat.object.pos.x += 16;
+ cat.object.pos.y += 16;
+ }*/
 
-		/*if (joystick_get_state(JOYSTICK_LEFT)) {
-			cat.oldDirection = cat.direction;
-			cat.direction = WEST;
-			if (cat.object.pos.x - STEP_CAT > 0) {
-				cat.object.pos.x -= STEP_CAT;
-			}
-		}else if (joystick_get_state(JOYSTICK_RIGHT)) {
-			cat.oldDirection = cat.direction;
-			cat.direction = EAST;
-			if (cat.object.pos.x + STEP_CAT < MAX_POS_X-48) {
-				cat.object.pos.x += STEP_CAT;
-			}
-		}else if (joystick_get_state(JOYSTICK_TOP)) {
-			cat.oldDirection = cat.direction;
-			cat.direction = NORTH;
-			if (cat.object.pos.y - STEP_CAT > 26) {
-				cat.object.pos.y -= STEP_CAT;
-			}
-		}else if (joystick_get_state(JOYSTICK_BOTTOM)) {
-			cat.oldDirection = cat.direction;
-			cat.direction = SOUTH;
-			if (cat.object.pos.y + STEP_CAT < 252-48) {
-				cat.object.pos.y += STEP_CAT;
-			}
-		}
-
-		if (((cat.oldDirection == NORTH)||(cat.oldDirection == SOUTH)) && ((cat.direction == WEST)||(cat.direction == EAST))) {
-			cat.object.pos.x -= 16;
-			cat.object.pos.y -= 16;
-		}else if (((cat.oldDirection == WEST)||(cat.oldDirection == EAST)) && ((cat.direction == NORTH)||(cat.direction == SOUTH))) {
-			cat.object.pos.x += 16;
-			cat.object.pos.y += 16;
-		}*/
-
-		/*switch (cat.direction) {
-			case NORTH:
-				if (cat.object.pos.y - STEP > 26) {
-					cat.object.pos.y -= STEP;
-				}
-				break;
-			case EAST:
-				if (cat.object.pos.x + STEP < MAX_POS_X-48) {
-					cat.object.pos.x += STEP;
-				}
-				break;
-			case SOUTH:
-				if (cat.object.pos.y + STEP < 252-48) {
-					cat.object.pos.y += STEP;
-				}
-				break;
-			case WEST:
-				if (cat.object.pos.x - STEP > 0) {
-					cat.object.pos.x -= STEP;
-				}
-				break;
-		}*/
-		//xQueueSendToBack(catQueue, &cat, portMAX_DELAY);
-	//}
+/*switch (cat.direction) {
+ case NORTH:
+ if (cat.object.pos.y - STEP > 26) {
+ cat.object.pos.y -= STEP;
+ }
+ break;
+ case EAST:
+ if (cat.object.pos.x + STEP < MAX_POS_X-48) {
+ cat.object.pos.x += STEP;
+ }
+ break;
+ case SOUTH:
+ if (cat.object.pos.y + STEP < 252-48) {
+ cat.object.pos.y += STEP;
+ }
+ break;
+ case WEST:
+ if (cat.object.pos.x - STEP > 0) {
+ cat.object.pos.x -= STEP;
+ }
+ break;
+ }*/
+//xQueueSendToBack(catQueue, &cat, portMAX_DELAY);
+//}
 //}
