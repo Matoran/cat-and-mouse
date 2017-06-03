@@ -8,6 +8,8 @@
 #ifndef DISPLAY_H_
 #define DISPLAY_H_
 
-void display();
+#include "objects.h"
+
+void task_display(void *param);
 
 #endif /* DISPLAY_H_ */

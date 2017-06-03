@@ -92,15 +92,11 @@ cat_t init_cat(){
 }
 
 void cat_move(){
-	if ((xQueue = xQueueCreate( 1, sizeof(int))) == NULL) {
+	if ((xQueue = xQueueCreate( 1, sizeof(int))) == 0) {
 		EXIT("Fail to create DMA queue !");
 	};
 
-	if ((catQueue = xQueueCreate( 10, sizeof(cat_t))) == NULL) {
-		EXIT("Fail to create DMA queue !");
-	};
-
-	init_dtmf();
+	//init_dtmf();
 	cat_t cat = init_cat();
 
 	//int pos;
