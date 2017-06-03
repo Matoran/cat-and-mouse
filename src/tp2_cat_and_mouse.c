@@ -47,7 +47,7 @@ int main(void)
 	static sprites_t sprites;
 	int i;
 
-	ethernet_power_down();				// remove potential noise on ADC due to Ethernet module
+	//ethernet_power_down();				// remove potential noise on ADC due to Ethernet module
 	init_lcd();
 	clear_screen(LCD_WHITE);
 	// load all necessary sprites
@@ -75,6 +75,10 @@ int main(void)
 			EXIT("Failed to create cat queue!");
 	}
 
+	if ((xQueue = xQueueCreate( 1, sizeof(int))) == 0) {
+		EXIT("Fail to create DMA queue !");
+	};
+
 	lcd_print(20, 150, BIGFONT, LCD_BLACK, LCD_WHITE, "Bon travail!");
 
 	//init_dtmf();
@@ -82,7 +86,7 @@ int main(void)
 	if (xTaskCreate(task_mouse, (signed portCHAR *)"mouse", configMINIMAL_STACK_SIZE, &sprites, 1, NULL) != pdPASS) {
 		while (1);
 	}
-	if (xTaskCreate(task_cat, (signed portCHAR *)"cat", configMINIMAL_STACK_SIZE, NULL, 1, NULL) != pdPASS) {
+	if (xTaskCreate(task_cat, (signed portCHAR *)"cat", configMINIMAL_STACK_SIZE, &sprites, 1, NULL) != pdPASS) {
 		while (1);
 	}
 	if (xTaskCreate(task_display, (signed portCHAR *)"display", configMINIMAL_STACK_SIZE, &sprites, 1, NULL) != pdPASS) {

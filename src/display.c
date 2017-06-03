@@ -28,6 +28,7 @@ void task_display(void *param) {
 	mouse_t oldMouse, newMouse;
 	init_mouse(&oldMouse);
 	cat_t oldCat, newCat;
+	init_cat(&oldCat);
 	for (int i = 0; i < 3; i++) {
 		display_bitmap16(sprites->cheese_im.bitmap, 28 + 80 * i, 0,
 				sprites->cheese_im.width, sprites->cheese_im.height);

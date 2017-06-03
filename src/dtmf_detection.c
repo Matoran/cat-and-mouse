@@ -19,10 +19,9 @@
 #define LIMIT_DETEC 10000
 #define FE 8000.
 #define PI 3.14159265359
-#define STEP 2
 #define abs1(x) ((x<0)?(-x):x)
 
-xQueueHandle xQueue;
+
 
 bool check_freq(uint16_t* buf, uint16_t freq){
 	double w;
@@ -81,74 +80,4 @@ unsigned short* init_dtmf()
 	if ((sig=init_adc_dma(1, FE, BUF_SIZE, buffer_filled))==NULL)
 		EXIT("Not enough memory to allocate acquisition buffers!");
 	return sig;
-}
-
-cat_t init_cat(){
-	cat_t cat;
-	cat.posX = 110;
-	cat.posY = 30;
-	cat.direction = SOUTH;
-	return cat;
-}
-
-void cat_move(){
-	if ((xQueue = xQueueCreate( 1, sizeof(int))) == 0) {
-		EXIT("Fail to create DMA queue !");
-	};
-
-	//init_dtmf();
-	cat_t cat = init_cat();
-
-	//int pos;
-	int buf;
-	unsigned short *buf1 = init_dtmf();
-	unsigned short *buf2 = buf1 + BUF_SIZE;
-
-	while(1){
-
-		xQueueReceive(xQueue, &buf,portMAX_DELAY);
-
-		if (buf == 0) {
-			cat.oldDirection = cat.direction;
-			cat.direction = direction(buf1);
-		}else if (buf == 1){
-			cat.oldDirection = cat.direction;
-			cat.direction = direction(buf2);
-		}
-
-		if (((cat.oldDirection == NORTH)||(cat.oldDirection == SOUTH)) && ((cat.direction == WEST)||(cat.direction == EAST))) {
-			cat.posX -= 16;
-			cat.posY -= 16;
-		}else if (((cat.oldDirection == WEST)||(cat.oldDirection == EAST)) && ((cat.direction == NORTH)||(cat.direction == SOUTH))) {
-			cat.posX += 16;
-			cat.posY += 16;
-		}
-
-		switch (cat.direction) {
-			case NORTH:
-				if (cat.posY - STEP > 26) {
-					cat.posY -= STEP;
-				}
-				break;
-			case EAST:
-				if (cat.posX + STEP < MAX_POS_X-48) {
-					cat.posX += STEP;
-				}
-				break;
-			case SOUTH:
-				if (cat.posY + STEP < 252-48) {
-					cat.posY += STEP;
-				}
-				break;
-			case WEST:
-				if (cat.posX - STEP > 0) {
-					cat.posX -= STEP;
-				}
-				break;
-		}
-
-
-		xQueueSendToBack(catQueue, &cat, portMAX_DELAY);
-
-	}
 }

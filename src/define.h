@@ -13,6 +13,7 @@
 
 extern xQueueHandle mouseQueue;
 extern xQueueHandle catQueue;
+extern xQueueHandle xQueue;
 
 #define MAX_POS_X 239
 #define MAX_POS_Y 299
