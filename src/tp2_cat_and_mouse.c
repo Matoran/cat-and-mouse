@@ -47,7 +47,7 @@ int main(void)
 	static sprites_t sprites;
 	int i;
 
-	ethernet_power_down();				// remove potential noise on ADC due to Ethernet module
+	//ethernet_power_down();				// remove potential noise on ADC due to Ethernet module
 	init_lcd();
 	clear_screen(LCD_WHITE);
 	// load all necessary sprites

@@ -12,13 +12,13 @@ void draw_interface(int old, int new) {
 				220,
 				318 - old * 18 / VITALITYMAX,
 				232,
-				(318 - new * 18 / VITALITYMAX) + 1,
+				318 - new * 18 / VITALITYMAX,
 				LCD_WHITE);
-	} else {
+	} else if(old < new) {
 		lcd_filled_rectangle(220,
 				318 - new * 18 / VITALITYMAX,
 				232,
-				318,
+				318 - old * 18 / VITALITYMAX,
 		LCD_GREEN);
 	}
 }
@@ -36,6 +36,7 @@ void task_display(void *param) {
 		lcd_filled_circle(30 + 6 + 80 * i, 313, 6, LCD_BLACK);
 	}
 	lcd_empty_rectangle(219, 299, 233, 319, LCD_BLACK);			// empty gauge
+	lcd_filled_rectangle(220, 318 - 18, 232, 318, LCD_GREEN);
 	portTickType xLastWakeTime = xTaskGetTickCount();
 	while (1) {
 		vTaskDelayUntil(&xLastWakeTime, 16 / portTICK_RATE_MS);
@@ -47,6 +48,9 @@ void task_display(void *param) {
 		if (xQueueReceive(catQueue, &newCat, 0)) {
 			draw_cat(&oldCat, &newCat, sprites);
 			oldCat = newCat;
+		}
+		if(detect_collision(newMouse.object, sprites->mouse_im[newMouse.object.dir], newCat.object, sprites->cat_im[newCat.object.dir])){
+
 		}
 	}
 

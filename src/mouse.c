@@ -49,59 +49,60 @@ bool joystick_get_state(uint8_t pos) {
 }
 
 void draw_mouse(mouse_t *old, mouse_t *new, sprites_t *sprites) {
-	if (new->object.dir == old->object.dir) {
-
+	if (old->score == new->score && new->object.dir == old->object.dir) {
 		switch (new->object.dir) {
 		case NORTH:
-			lcd_filled_rectangle(
-					new->object.pos.x,
-					new->object.pos.y + sprites->mouse_im[new->object.dir].height,
-					old->object.pos.x + sprites->mouse_im[old->object.dir].width,
-					old->object.pos.y + sprites->mouse_im[old->object.dir].height,
+			lcd_filled_rectangle(new->object.pos.x,
+					new->object.pos.y
+							+ sprites->mouse_im[new->object.dir].height,
+					old->object.pos.x
+							+ sprites->mouse_im[old->object.dir].width,
+					old->object.pos.y
+							+ sprites->mouse_im[old->object.dir].height,
 					LCD_WHITE);
 			break;
 		case EAST:
-			lcd_filled_rectangle(
-					new->object.pos.x,
-					new->object.pos.y,
+			lcd_filled_rectangle(new->object.pos.x, new->object.pos.y,
 					old->object.pos.x,
-					old->object.pos.y + sprites->mouse_im[old->object.dir].height,
+					old->object.pos.y
+							+ sprites->mouse_im[old->object.dir].height,
 					LCD_WHITE);
 			break;
 		case SOUTH:
-			lcd_filled_rectangle(
-					new->object.pos.x,
-					new->object.pos.y,
-					old->object.pos.x + sprites->mouse_im[old->object.dir].width,
+			lcd_filled_rectangle(new->object.pos.x, new->object.pos.y,
+					old->object.pos.x
+							+ sprites->mouse_im[old->object.dir].width,
 					old->object.pos.y,
 					LCD_WHITE);
 			break;
 		case WEST:
 			lcd_filled_rectangle(
-					new->object.pos.x + sprites->mouse_im[old->object.dir].width,
+					new->object.pos.x
+							+ sprites->mouse_im[old->object.dir].width,
 					new->object.pos.y,
-					old->object.pos.x + sprites->mouse_im[old->object.dir].width,
-					old->object.pos.y + sprites->mouse_im[old->object.dir].height,
+					old->object.pos.x
+							+ sprites->mouse_im[old->object.dir].width,
+					old->object.pos.y
+							+ sprites->mouse_im[old->object.dir].height,
 					LCD_WHITE);
 			break;
 		}
 	} else {
-		lcd_filled_rectangle(
-				old->object.pos.x,
-				old->object.pos.y,
+		lcd_filled_rectangle(old->object.pos.x, old->object.pos.y,
 				old->object.pos.x + sprites->mouse_im[old->object.dir].width,
 				old->object.pos.y + sprites->mouse_im[old->object.dir].height,
 				LCD_WHITE);
 	}
 
-	display_bitmap16(sprites->mouse_im[new->object.dir].bitmap, new->object.pos.x,
-			new->object.pos.y, sprites->mouse_im[new->object.dir].width,
+	display_bitmap16(sprites->mouse_im[new->object.dir].bitmap,
+			new->object.pos.x, new->object.pos.y,
+			sprites->mouse_im[new->object.dir].width,
 			sprites->mouse_im[new->object.dir].height);
 }
 
 void task_mouse(void *param) {
 
-	sprites_t *sprites = (sprites_t*)param;
+	sprites_t *sprites = (sprites_t*) param;
 	mouse_t mouse;
 	init_mouse(&mouse);
 	portTickType xLastWakeTime = xTaskGetTickCount();
@@ -110,28 +111,28 @@ void task_mouse(void *param) {
 		mouse.m = (3 * mouse.vitality + VITALITYMAX / 2) / VITALITYMAX + 1;
 		mouse.moving = true;
 		if (joystick_get_state(JOYSTICK_LEFT)) {
+			mouse.object.dir = WEST;
 			if (mouse.object.pos.x - mouse.m > 0) {
 				mouse.object.pos.x -= mouse.m;
 			}
-			mouse.object.dir = WEST;
 		} else if (joystick_get_state(JOYSTICK_RIGHT)) {
+			mouse.object.dir = EAST;
 			if (mouse.object.pos.x + mouse.m
 					+ sprites->mouse_im[mouse.object.dir].width < 239) {
 				mouse.object.pos.x += mouse.m;
 			}
-			mouse.object.dir = EAST;
 		} else if (joystick_get_state(JOYSTICK_TOP)) {
+			mouse.object.dir = NORTH;
 			if (mouse.object.pos.y - mouse.m > 26) {
 				mouse.object.pos.y -= mouse.m;
 			} else {
 				reset_mouse(&mouse);
 			}
-			mouse.object.dir = NORTH;
 		} else if (joystick_get_state(JOYSTICK_BOTTOM)) {
+			mouse.object.dir = SOUTH;
 			if (mouse.object.pos.y + mouse.m < 280) {
 				mouse.object.pos.y += mouse.m;
 			}
-			mouse.object.dir = SOUTH;
 		} else {
 			mouse.moving = false;
 		}
@@ -141,7 +142,7 @@ void task_mouse(void *param) {
 		} else if (mouse.moving && mouse.vitality > 0) {
 			mouse.vitality--;
 		}
-		xQueueSend(mouseQueue, ( void * ) &mouse, (portTickType) 0);
+		xQueueSend(mouseQueue, (void * ) &mouse, (portTickType ) 0);
 	}
 }
 
