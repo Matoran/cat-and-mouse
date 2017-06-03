@@ -107,10 +107,10 @@ void task_cat(void *param){
 
 		if (((old_direction == NORTH)||(old_direction == SOUTH)) && ((cat.object.dir == WEST)||(cat.object.dir == EAST))) {
 			cat.object.pos.x -= 16;
-			cat.object.pos.y -= 16;
+			cat.object.pos.y += 16;
 		}else if (((old_direction == WEST)||(old_direction == EAST)) && ((cat.object.dir == NORTH)||(cat.object.dir == SOUTH))) {
 			cat.object.pos.x += 16;
-			cat.object.pos.y += 16;
+			cat.object.pos.y -= 16;
 		}
 
 		xQueueSend(catQueue, ( void * ) &cat, (portTickType) 0);

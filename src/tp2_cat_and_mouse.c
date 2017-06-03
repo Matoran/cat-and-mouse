@@ -24,24 +24,6 @@
 #include "cat.h"
 
 
-
-
-/* Description: detects collisions between 2 rectangular objects. As soon as the distance between
- * both objects if lower than or equal to the margin, the collision is detected.
- * Parameters:
- * 	obj1 and obj2: positions and directions of the objects concerned
- * 	obj1_im, obj2_im: reference to the object images (containing the dimensions)
- * Return: true if the collision is detected, false otherwise
- */
-bool detect_collision(object_t obj1, image_t *obj1_im, object_t obj2, image_t *obj2_im, int margin)
-{
-	return ((obj1.pos.x-obj2.pos.x<(int)obj2_im[obj2.dir].width+margin-1) &&
-		(obj2.pos.x-obj1.pos.x<(int)obj1_im[obj1.dir].width+margin-1) &&
-		(obj2.pos.y-obj1.pos.y<(int)obj1_im[obj1.dir].height+margin-1) &&
-		(obj1.pos.y-obj2.pos.y<(int)obj2_im[obj2.dir].height+margin-1));
-}
-
-
 int main(void)
 {
 	static sprites_t sprites;
