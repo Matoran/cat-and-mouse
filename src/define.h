@@ -13,6 +13,8 @@
 
 extern xQueueHandle mouseQueue;
 extern xQueueHandle catQueue;
+extern xQueueHandle mouseResetQueue;
+extern xQueueHandle catResetQueue;
 extern xQueueHandle xQueue;
 
 #define MAX_POS_X 239

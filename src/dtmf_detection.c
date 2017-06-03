@@ -16,7 +16,7 @@
 #include "dtmf_detection.h"
 
 #define BUF_SIZE 400
-#define LIMIT_DETEC 10000
+#define LIMIT_DETEC 2000000
 #define FE 8000.
 #define PI 3.14159265359
 #define abs1(x) ((x<0)?(-x):x)
@@ -30,12 +30,12 @@ bool check_freq(uint16_t* buf, uint16_t freq){
 	sum.re = 0;
 
 	for (int i = 0; i < BUF_SIZE - 1; ++i) {
-		w = (2*PI*(852/FE)*i)*PI/180;
+		w = (2*PI*(freq/FE)*i)*PI/180;
 		sum.im += buf[i] * sinf(w-BUF_SIZE);
 		sum.re += buf[i] * cosf(w-BUF_SIZE);
 	}
-
-	if ((abs1(sum.im)+abs1(sum.re)) > LIMIT_DETEC){
+	float value = (abs1(sum.im)+abs1(sum.re));
+	if (value > LIMIT_DETEC){
 		return true;
 	}else{
 		return false;
@@ -58,7 +58,6 @@ int direction (uint16_t* buf){
 			return WEST;
 		}
 	}
-
 	return -1;
 }
 
@@ -68,7 +67,7 @@ int direction (uint16_t* buf){
 // buf_index: 0 or 1, indicating which buffer is full
 void buffer_filled(int buf_index)
 {
-	xQueueSendToBack(xQueue, &buf_index, portMAX_DELAY);
+	xQueueSendFromISR(xQueue, &buf_index, 0);
 }
 
 // Initialise the reception of the sound samples

@@ -3,6 +3,7 @@
 
 #include "objects.h"
 #include "define.h"
+#define BUF_SIZE 400
 
 typedef struct complex{
 	float re;
@@ -11,5 +12,6 @@ typedef struct complex{
 
 unsigned short* init_dtmf();
 dir_t read_dtmf(int buf_idx);
+int direction (uint16_t* buf);
 
 #endif

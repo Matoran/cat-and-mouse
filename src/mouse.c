@@ -20,7 +20,6 @@ void init_mouse(mouse_t *mouse) {
 	mouse->moving = false;
 	mouse->vitality = VITALITYMAX;
 	mouse->m = 0;
-	mouse->score = 0;
 }
 
 void reset_mouse(mouse_t *mouse) {
@@ -30,7 +29,6 @@ void reset_mouse(mouse_t *mouse) {
 	mouse->object.dir = NORTH;
 	mouse->vitality = VITALITYMAX;
 	mouse->m = 0;
-	mouse->score++;
 }
 
 /***********************************
@@ -49,7 +47,7 @@ bool joystick_get_state(uint8_t pos) {
 }
 
 void draw_mouse(mouse_t *old, mouse_t *new, sprites_t *sprites) {
-	if (old->score == new->score && new->object.dir == old->object.dir) {
+	if (new->object.dir == old->object.dir) {
 		switch (new->object.dir) {
 		case NORTH:
 			lcd_filled_rectangle(new->object.pos.x,
@@ -105,9 +103,14 @@ void task_mouse(void *param) {
 	sprites_t *sprites = (sprites_t*) param;
 	mouse_t mouse;
 	init_mouse(&mouse);
+	bool reset;
 	portTickType xLastWakeTime = xTaskGetTickCount();
+
 	while (1) {
 		vTaskDelayUntil(&xLastWakeTime, 20 / portTICK_RATE_MS);
+		if (xQueueReceive(mouseResetQueue, &reset, 0)) {
+			reset_mouse(&mouse);
+		}
 		mouse.m = (3 * mouse.vitality + VITALITYMAX / 2) / VITALITYMAX + 1;
 		mouse.moving = true;
 		if (joystick_get_state(JOYSTICK_LEFT)) {
@@ -125,8 +128,6 @@ void task_mouse(void *param) {
 			mouse.object.dir = NORTH;
 			if (mouse.object.pos.y - mouse.m > 26) {
 				mouse.object.pos.y -= mouse.m;
-			} else {
-				reset_mouse(&mouse);
 			}
 		} else if (joystick_get_state(JOYSTICK_BOTTOM)) {
 			mouse.object.dir = SOUTH;
