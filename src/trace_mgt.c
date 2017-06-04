@@ -1,7 +1,8 @@
-/*
- * Description: trace management using UART (and MyLab_lib)
- * Created on : 5.5.2017
- * Author     : VP
+/**
+ * @authors: LOPES Marco, ISELI Cyril and RINGOT Gaëtan
+ * Purpose: manage traces
+ * Language:  C
+ * Date : april 2017
  */
 #ifdef __USE_CMSIS
 #include "LPC17xx.h"
@@ -12,31 +13,40 @@
 #include "queue.h"
 #include "semphr.h"
 #include "uart.h"
+#include "traces_ref.h"
+#include "trace_mgt.h"
+#include "define.h"
 
-/* Description: write a trace to a memory buffer. Note that this function is
- *              automatically called by FreeRTOS in privileged mode.
- *
- * Parameters: trace_id: trace ID. Usually the task number in FreeRTOS.
- *             val: 1 if task becomes active, 0 otherwise
+buffer_trace buffer;
+
+/**
+ * write a trace to a circulary buffer
+ * @param trace_id the trace number(task number)
+ * @param val 0 or 1
  */
-void write_trace(uint8_t trace_id, short val)
-{
-	write_trace_ref(trace_id, val);		// to be replaced by your own implementation
+void write_trace(uint8_t trace_id, short val) {
+#if TRACE == TRACE_PERSO
+	buffer.trace[buffer.write_pos].time = LPC_TIM0->TC;
+	buffer.trace[buffer.write_pos].synchro = SYNCHRO_WORD;
+	buffer.trace[buffer.write_pos].sig_idx = trace_id;
+	buffer.trace[buffer.write_pos++].val = val;
+	buffer.write_pos %= BUFFER_MAX;
+#else
+	write_trace_ref(trace_id, val);
+#endif
 }
 
-
-// implement trace sending here after having set configUSE_IDLE_HOOK to 1 in FreeRTOSConfig.h
-// note that portSET_INTERRUPT_MASK() and portCLEAR_INTERRUPT_MASK() can be used
-// to protect critical sections if any. Do not use mutexes here, they have no effect!
-
-void vApplicationIdleHook( void )
-{
-
+/**
+ * called by FreeRTOS when it do nothing
+ */
+void vApplicationIdleHook(void) {
+	while (1) {
+		if (buffer.write_pos != buffer.read_pos) {
+			uart0_send((uint8_t *) &buffer.trace[buffer.read_pos++], sizeof(trace_t));
+			buffer.read_pos %= BUFFER_MAX;
+		}
+		taskYIELD();		// force changement de contexte
+	}
 }
 
-void task_traces(){
-	//while(1){
-
-	//}
-}
 

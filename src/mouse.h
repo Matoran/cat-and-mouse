@@ -17,6 +17,7 @@
 #define JOYSTICK_RIGHT	 21
 #define JOYSTICK_TOP	 20
 #define JOYSTICK_BOTTOM	 22
+#define JOYSTICK_CENTER	 19
 #define VITALITYMAX 	 75
 #define NORTH			 0
 #define EAST			 1

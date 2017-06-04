@@ -24,11 +24,16 @@
 #include "cat.h"
 #include "define.h"
 #include "custom_rand.h"
+#include "uart.h"
 
 int main(void) {
 	static sprites_t sprites;
 	int i;
 	init_rnd32(1);
+	uart0_init(115200);
+	LPC_TIM0->PR = 0;
+	LPC_TIM0->TCR = 2;
+	LPC_TIM0->TCR = 1;
 	//ethernet_power_down();// remove potential noise on ADC due to Ethernet module
 	init_lcd();
 	clear_screen(LCD_WHITE);
@@ -56,7 +61,7 @@ int main(void) {
 		if (sprites.cat_im[i].bitmap == NULL
 				|| sprites.mouse_im[i].bitmap == NULL)
 			EXIT("Not enough space to create image!");
-	init_traces(115200, 2, true);// to be removed if you implement your own traces
+	//init_traces(115200, 2, true);// to be removed if you implement your own traces
 	//queue
 	if ((mouseQueue = xQueueCreate(1, sizeof(mouse_t))) == 0) {
 		EXIT("Failed to create mouse queue!");
@@ -87,7 +92,7 @@ int main(void) {
 			;
 	}
 	if (xTaskCreate(task_display, (signed portCHAR *)"display",
-			configMINIMAL_STACK_SIZE, &sprites, 1, NULL) != pdPASS) {
+			configMINIMAL_STACK_SIZE, &sprites, 2, NULL) != pdPASS) {
 		while (1)
 			;
 	}

@@ -8,9 +8,22 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include "traces_ref.h"
+
+#define BUFFER_MAX 50
+
+
+typedef struct {
+	int read_pos;
+	int write_pos;
+	trace_t trace[BUFFER_MAX * sizeof(trace_t)];
+} buffer_trace;
 
 /* uses timer 2 */
-void init_traces();
+//void init_traces();
 void write_trace(uint8_t sig_idx, short val);
 void task_traces();
+
+
+
 #endif
