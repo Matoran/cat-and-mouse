@@ -18,6 +18,12 @@
 
 #define BUF_SIZE 400
 
+/**
+ * Draw cat this function is call in the task display
+ * @param old cat with precedent position
+ * @param new cat with the new position
+ * @param sprites image of cat
+ */
 void draw_cat(cat_t *old, cat_t *new, sprites_t *sprites) {
 	if (new->object.dir == old->object.dir) {
 		switch (new->object.dir) {
@@ -61,12 +67,20 @@ void draw_cat(cat_t *old, cat_t *new, sprites_t *sprites) {
 			sprites->cat_im[new->object.dir].height);
 }
 
+/**
+ * Initialize the cat
+ * @param cat structure cat
+ */
 void init_cat(cat_t *cat) {
 	cat->object.pos.x = 110;
 	cat->object.pos.y = 30;
 	cat->object.dir = SOUTH;
 }
 
+/**
+ * This is the routine for the cat
+ * @param param sprites for the cat
+ */
 void task_cat(void *param) {
 	sprites_t *sprites = (sprites_t*) param;
 	portTickType xLastWakeTime = xTaskGetTickCount();
@@ -74,6 +88,7 @@ void task_cat(void *param) {
 	init_cat(&cat);
 	int old_direction = cat.object.dir;
 	int dir;
+	//for the rotation of cat
 	int x = (sprites->cat_im[WEST].width - sprites->cat_im[NORTH].width) / 2;
 	int y = (sprites->cat_im[NORTH].height - sprites->cat_im[WEST].height) / 2;
 
@@ -87,6 +102,7 @@ void task_cat(void *param) {
 			init_cat(&cat);
 		}
 		old_direction = cat.object.dir;
+		//Get the direction
 		if (xQueueReceive(xQueue, &buf, 0)) {
 			if (buf == 0) {
     			dir = direction(buf1);
@@ -144,6 +160,4 @@ void task_cat(void *param) {
 		xQueueSend(catQueue, (void * ) &cat, (portTickType ) 0);
 	}
 }
-/////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////
 

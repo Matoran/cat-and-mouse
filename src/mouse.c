@@ -11,6 +11,10 @@
 #include "task.h"
 #include <stdio.h>
 
+/**
+ * Initialize the mouse
+ * @param mouse structure
+ */
 void init_mouse(mouse_t *mouse) {
 	int random_pos = randBetween(0, 2);
 	LPC_GPIO1->FIODIR &= ~(0b11111 << 19);
@@ -22,6 +26,11 @@ void init_mouse(mouse_t *mouse) {
 	mouse->m = 0;
 }
 
+/**
+ * Reset the mouse when the cat touch her or
+ * if she got a cheese
+ * @param mouse
+ */
 void reset_mouse(mouse_t *mouse) {
 	int random_pos = randBetween(0, 2);
 	mouse->object.pos.x = random_pos * 80 + 34;
@@ -46,6 +55,12 @@ bool joystick_get_state(uint8_t pos) {
 	}
 }
 
+/**
+ * Draw a mouse this function is call in the task display
+ * @param old mouse with the precedent positions
+ * @param new mouse with the new positions
+ * @param sprites image of mouse
+ */
 void draw_mouse(mouse_t *old, mouse_t *new, sprites_t *sprites) {
 	if (new->object.dir == old->object.dir) {
 		switch (new->object.dir) {
@@ -98,6 +113,10 @@ void draw_mouse(mouse_t *old, mouse_t *new, sprites_t *sprites) {
 			sprites->mouse_im[new->object.dir].height);
 }
 
+/**
+ * This is the routine for the mouse
+ * @param param sprite image of mouse
+ */
 void task_mouse(void *param) {
 
 	sprites_t *sprites = (sprites_t*) param;

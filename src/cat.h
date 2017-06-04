@@ -1,8 +1,8 @@
-/*
- * cat.h
- *
- *  Created on: Jun 2, 2017
- *      Author: matoran
+/**
+ * @authors: LOPES Marco, ISELI Cyril and RINGOT Gaëtan
+ * Purpose: cat
+ * Language:  C
+ * Date : june 2017
  */
 
 #ifndef CAT_H_
