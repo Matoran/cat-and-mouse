@@ -1,3 +1,9 @@
+/**
+ * @authors: LOPES Marco, ISELI Cyril and RINGOT Gaëtan
+ * Purpose: display all the game
+ * Language:  C
+ * Date : june 2017
+ */
 #include "display.h"
 #include "mouse.h"
 #include "cat.h"

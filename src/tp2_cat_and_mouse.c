@@ -1,8 +1,8 @@
 /**
- * Name        : tp2_cat_and_mouse.c
- * Date        : 5.5.2017
- * Description : cat and mouse game with 2 mylab2 boards. FreeRTOS
- *               and LCD display used.
+ * @authors: LOPES Marco, ISELI Cyril and RINGOT Gaëtan
+ * Purpose: main
+ * Language:  C
+ * Date : june 2017
  */
 
 #include <cr_section_macros.h>
@@ -57,7 +57,7 @@ int main(void) {
 				|| sprites.mouse_im[i].bitmap == NULL)
 			EXIT("Not enough space to create image!");
 	init_traces(115200, 2, true);// to be removed if you implement your own traces
-
+	//queue
 	if ((mouseQueue = xQueueCreate(1, sizeof(mouse_t))) == 0) {
 		EXIT("Failed to create mouse queue!");
 	}
@@ -75,7 +75,7 @@ int main(void) {
 	if ((xQueue = xQueueCreate(1, sizeof(int))) == 0) {
 		EXIT("Fail to create DMA queue !");
 	};
-
+	//task
 	if (xTaskCreate(task_mouse, (signed portCHAR *)"mouse",
 			configMINIMAL_STACK_SIZE, &sprites, 1, NULL) != pdPASS) {
 		while (1)

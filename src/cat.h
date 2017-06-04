@@ -1,10 +1,3 @@
-/**
- * @authors: LOPES Marco, ISELI Cyril and RINGOT Gaëtan
- * Purpose: cat
- * Language:  C
- * Date : june 2017
- */
-
 #ifndef CAT_H_
 #define CAT_H_
 

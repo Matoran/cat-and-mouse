@@ -1,8 +1,8 @@
-/*
- * mouse->c
- *
- *  Created on: 24 mai 2017
- *      Author: selement
+/**
+ * @authors: LOPES Marco, ISELI Cyril and RINGOT Gaëtan
+ * Purpose: All function for the mouse
+ * Language:  C
+ * Date : june 2017
  */
 #include "mouse.h"
 #include "lcd.h"

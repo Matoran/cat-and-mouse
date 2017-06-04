@@ -1,6 +1,6 @@
 /**
  * @authors: LOPES Marco, ISELI Cyril and RINGOT Gaëtan
- * Purpose: cat
+ * Purpose: All function for the cat
  * Language:  C
  * Date : june 2017
  */
