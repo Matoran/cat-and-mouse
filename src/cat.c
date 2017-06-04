@@ -1,8 +1,8 @@
-/*
- * cat.c
- *
- *  Created on: Jun 2, 2017
- *      Author: matoran
+/**
+ * @authors: LOPES Marco, ISELI Cyril and RINGOT Gaëtan
+ * Purpose: cat
+ * Language:  C
+ * Date : june 2017
  */
 
 #include "cat.h"
@@ -10,6 +10,7 @@
 #include "task.h"
 #include "lcd.h"
 #include "mouse.h"
+#include "dtmf_detection.h"
 #include <stdio.h>
 #include <stdbool.h>
 
@@ -72,11 +73,74 @@ void task_cat(void *param) {
 	int x = (sprites->cat_im[WEST].width - sprites->cat_im[NORTH].width) / 2;
 	int y = (sprites->cat_im[NORTH].height - sprites->cat_im[WEST].height) / 2;
 	;
+
+	int dir;
+	int buf;
+	unsigned short *buf1 = init_dtmf();
+	unsigned short *buf2 = buf1 + BUF_SIZE;
 	while (1) {
 		vTaskDelayUntil(&xLastWakeTime, 50 / portTICK_RATE_MS);
 		old_direction = cat.object.dir;
 
-		if (joystick_get_state(JOYSTICK_LEFT)) {
+		xQueueReceive(xQueue, &buf,0);
+
+
+		if (buf == 0) {
+			dir = direction(buf1);
+			if (dir != -1) {
+				cat.object.dir = dir;
+			}
+		}else if (buf == 1){
+			dir = direction(buf1);
+			if (dir != -1) {
+				cat.object.dir = dir;
+			}
+		}
+
+		//Case of queue is empty don't move;
+		if (((buf == 1) || (buf == 0))&&(dir!=0)) {
+			if (cat.object.dir == WEST) {
+				if (old_direction == NORTH || old_direction == SOUTH) {
+					cat.object.pos.x -= x;
+					cat.object.pos.y += y;
+				}
+				if (cat.object.pos.x - STEP_CAT > 0) {
+					cat.object.pos.x -= STEP_CAT;
+				}
+			} else if (cat.object.dir == EAST) {
+				if (old_direction == NORTH || old_direction == SOUTH) {
+					cat.object.pos.x -= x;
+					cat.object.pos.y += y;
+				}
+				if (cat.object.pos.x + STEP_CAT < MAX_POS_X - 48) {
+					cat.object.pos.x += STEP_CAT;
+				}
+			} else if (cat.object.dir == NORTH) {
+				if (old_direction == WEST || old_direction == EAST) {
+					cat.object.pos.x += x;
+					cat.object.pos.y -= y;
+				}
+				if (cat.object.pos.y - STEP_CAT > 26) {
+					cat.object.pos.y -= STEP_CAT;
+				}
+			} else if (cat.object.dir == SOUTH) {
+				if (old_direction == WEST || old_direction == EAST) {
+					cat.object.pos.x += x;
+					cat.object.pos.y -= y;
+				}
+				if (cat.object.pos.y + STEP_CAT < 252 - 48) {
+					cat.object.pos.y += STEP_CAT;
+				}
+			}
+		}
+
+		xQueueSend(catQueue, (void * ) &cat, (portTickType ) 0);
+	}
+}
+////////////////////////////////////////////////////////////////
+//////////// JOYSTICK CONTROL /////////////////////////////////
+
+/*if (joystick_get_state(JOYSTICK_LEFT)) {
 			cat.object.dir = WEST;
 			if (old_direction == NORTH || old_direction == SOUTH) {
 				cat.object.pos.x -= x;
@@ -112,11 +176,11 @@ void task_cat(void *param) {
 			if (cat.object.pos.y + STEP_CAT < 252 - 48) {
 				cat.object.pos.y += STEP_CAT;
 			}
-		}
+		}*/
 
-		xQueueSend(catQueue, (void * ) &cat, (portTickType ) 0);
-	}
-}
+/////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////
+
 
 //void cat_move(){
 

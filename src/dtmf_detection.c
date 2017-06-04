@@ -15,46 +15,84 @@
 #include "objects.h"
 #include "dtmf_detection.h"
 
-#define BUF_SIZE 400
-#define LIMIT_DETEC 10000
-#define FE 8000.
-#define PI 3.14159265359
-#define abs1(x) ((x<0)?(-x):x)
+// if you need additional buffers, enable the next line and declare them after it to place them in local RAM (RAM2 could be full!)
+//__attribute__ ((section(".data")))
+
+float sin_values[4][BUF_SIZE];
+float cos_values[4][BUF_SIZE];
 
 
-
-bool check_freq(uint16_t* buf, uint16_t freq){
-	double w;
-	complex sum;
-	sum.im = 0;
-	sum.re = 0;
-
-	for (int i = 0; i < BUF_SIZE - 1; ++i) {
-		w = (2*PI*(852/FE)*i)*PI/180;
-		sum.im += buf[i] * sinf(w-BUF_SIZE);
-		sum.re += buf[i] * cosf(w-BUF_SIZE);
-	}
-
-	if ((abs1(sum.im)+abs1(sum.re)) > LIMIT_DETEC){
-		return true;
-	}else{
-		return false;
+/**
+ * Init all data for sin and cos
+ * It's usefull because it need time
+ * but never change.
+ */
+void init_values(){
+	float w;
+	float freq[4] = {FREQ1, FREQ2, FREQ3, FREQ4};
+	for (int f = 0; f < 4; f++) {
+		for (int i = 0; i < BUF_SIZE; i++) {
+			w = (2*PI*((float)i*freq[f]/FE));
+			sin_values[f][i] = sinf(w);
+			cos_values[f][i] = cosf(w);
+		}
 	}
 }
 
-// if you need additional buffers, enable the next line and declare them after it to place them in local RAM (RAM2 could be full!)
-//__attribute__ ((section(".data")))
+/**
+ * Test if the paddle touch the right border
+ * @param1 Buffer to use in calculation
+ * @param2 0 = 852/941, 2 = 1336/1608
+ * @return Frequency
+ */
+int check_freq(uint16_t* buf,int numCheck){
+	complex res[2];
+
+	for (int i = 0; i < BUF_SIZE ; i++) {
+		float val = buf[i]  - (INT16_MAX >> 1);
+		res[0].im -= val * cos_values[numCheck][i];
+		res[0].re += val * sin_values[numCheck][i];
+
+		res[1].im -= val * cos_values[numCheck+1][i];
+		res[1].re += val * sin_values[numCheck+1][i];
+	}
+
+
+	if (numCheck == 0) {
+		if ((abs1(res[0].im)+abs1(res[0].re)) > LIMIT_DETEC) return FREQ1;
+		if ((abs1(res[1].im)+abs1(res[1].re)) > LIMIT_DETEC) return FREQ2;
+	}else if (numCheck == 2) {
+		float freq3 = (abs1(res[0].im)+abs1(res[0].re));
+		float freq4 = (abs1(res[1].im)+abs1(res[1].re));
+		//second try
+		// if ((freq4 > LIMIT_DETEC) && (freq4 > freq3)) return FREQ4;
+		if ((freq3 > LIMIT_DETEC)) return FREQ3;
+		if ((freq4 > LIMIT_DETEC)) return FREQ4;
+
+	}
+	return -1;
+}
+
+
+/**
+ * Check which direction is in the buffer
+ * @param1 Buffer to use in calculation
+ * @return Direction or -1 if no direction
+ */
 int direction (uint16_t* buf){
-	if (check_freq(buf,852)) {
-		if (check_freq(buf,1336)) {
+	int resFreq1 = check_freq(buf,0);
+	int resFreq2 = check_freq(buf,2);
+
+	if (resFreq1 == FREQ1) {
+		if (resFreq2 == FREQ3) {
 			return NORTH;
-		}else if (check_freq(buf,1608)){
-			return EAST;
-		}
-	}else if (check_freq(buf,941)) {
-		if (check_freq(buf,1336)) {
+		}else if (resFreq2 == FREQ4){
 			return SOUTH;
-		}else if (check_freq(buf,1608)){
+		}
+	}else if (resFreq1 == FREQ2) {
+		if (resFreq2 == FREQ3) {
+			return EAST;
+		}else if (resFreq2 == FREQ4){
 			return WEST;
 		}
 	}
@@ -68,12 +106,13 @@ int direction (uint16_t* buf){
 // buf_index: 0 or 1, indicating which buffer is full
 void buffer_filled(int buf_index)
 {
-	xQueueSendToBack(xQueue, &buf_index, portMAX_DELAY);
+	xQueueSendFromISR(xQueue, &buf_index, 0);
 }
 
 // Initialise the reception of the sound samples
 unsigned short* init_dtmf()
 {
+	init_values();
 	unsigned short *sig; // pointer on acquisition double buffer
 	// initialise DMA&ADC to receive samples from the audio line at 8000 kHz.
 	// The return pointer points on the the double buffer allocated.
