@@ -94,7 +94,7 @@ void task_cat(void *param) {
     				cat.object.dir = dir;
     			}
     		}else if (buf == 1){
-    			dir = direction(buf1);
+    			dir = direction(buf2);
     			if (dir != -1) {
     				cat.object.dir = dir;
     			}
@@ -102,44 +102,48 @@ void task_cat(void *param) {
 		}
 
 		switch (cat.object.dir) {
-		case NORTH:
-			if (old_direction == WEST || old_direction == EAST) {
-				cat.object.pos.x += x;
-				cat.object.pos.y -= y;
-			}
-			if (cat.object.pos.y - STEP_CAT > 26) {
-				cat.object.pos.y -= STEP_CAT;
-			}
-			break;
-		case SOUTH:
-			if (old_direction == WEST || old_direction == EAST) {
-				cat.object.pos.x += x;
-				cat.object.pos.y -= y;
-			}
-			if (cat.object.pos.y + STEP_CAT < 252 - 48) {
-				cat.object.pos.y += STEP_CAT;
-			}
-			break;
-		case WEST:
-			if (old_direction == NORTH || old_direction == SOUTH) {
-				cat.object.pos.x -= x;
-				cat.object.pos.y += y;
-			}
-			if (cat.object.pos.x - STEP_CAT > 0) {
-				cat.object.pos.x -= STEP_CAT;
-			}
-			break;
-		case EAST:
-			if (old_direction == NORTH || old_direction == SOUTH) {
-				cat.object.pos.x -= x;
-				cat.object.pos.y += y;
-			}
-			if (cat.object.pos.x + STEP_CAT < MAX_POS_X - 48) {
-				cat.object.pos.x += STEP_CAT;
-			}
-			break;
+			case NORTH:
+				if (old_direction == WEST || old_direction == EAST) {
+					cat.object.pos.x += x;
+					cat.object.pos.y -= y;
+				}
+				if (cat.object.pos.y - STEP_CAT > 26) {
+					cat.object.pos.y -= STEP_CAT;
+				}
+				break;
+			case SOUTH:
+				if (old_direction == WEST || old_direction == EAST) {
+					cat.object.pos.x += x;
+					cat.object.pos.y -= y;
+				}
+				if (cat.object.pos.y + STEP_CAT < 252 - 48) {
+					cat.object.pos.y += STEP_CAT;
+				}
+				break;
+			case WEST:
+				if (old_direction == NORTH || old_direction == SOUTH) {
+					cat.object.pos.x -= x;
+					cat.object.pos.y += y;
+				}
+				if (cat.object.pos.x - STEP_CAT > 0) {
+					cat.object.pos.x -= STEP_CAT;
+				}
+				break;
+			case EAST:
+				if (old_direction == NORTH || old_direction == SOUTH) {
+					cat.object.pos.x -= x;
+					cat.object.pos.y += y;
+				}
+				if (cat.object.pos.x + STEP_CAT < MAX_POS_X - 48) {
+					cat.object.pos.x += STEP_CAT;
+				}
+				break;
+			default:
+				break;
 		}
-
+		xQueueSend(catQueue, (void * ) &cat, (portTickType ) 0);
+	}
+}
 /////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////
 
