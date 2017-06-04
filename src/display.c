@@ -1,3 +1,9 @@
+/**
+ * @authors: LOPES Marco, ISELI Cyril and RINGOT Gaëtan
+ * Purpose: display all the game
+ * Language:  C
+ * Date : june 2017
+ */
 #include "display.h"
 #include "mouse.h"
 #include "cat.h"
@@ -23,6 +29,11 @@ bool detect_collision(object_t obj1, image_t *obj1_im, object_t obj2, image_t *o
 		(obj1.pos.y-obj2.pos.y<(int)obj2_im[obj2.dir].height+margin-1));
 }
 
+/**
+ * Draw gauge
+ * @param old vitality
+ * @param new vitality
+ */
 void draw_interface(int old, int new) {
 	if (old > new) {
 		lcd_filled_rectangle(
@@ -40,6 +51,10 @@ void draw_interface(int old, int new) {
 	}
 }
 
+/**
+ * Task for the display, it displays the entire game
+ * @param param sprites image of mouse and cat
+ */
 void task_display(void *param) {
 	sprites_t *sprites = (sprites_t*) param;
 	mouse_t oldMouse, newMouse;

@@ -1,7 +1,8 @@
 /**
- * Name        : dtmf_detection.c
- * Date        : 5.5.2017
- * Description : template of the DTMF detector
+ * @authors: LOPES Marco, ISELI Cyril and RINGOT Gaëtan
+ * Purpose: dtmf_detection
+ * Language:  C
+ * Date : june 2017
  */
 #include <cr_section_macros.h>
 #include <string.h>
