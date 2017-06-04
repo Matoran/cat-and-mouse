@@ -47,6 +47,10 @@ void init_values(){
  */
 int check_freq(uint16_t* buf,int numCheck){
 	complex res[2];
+	for(int i = 0; i < 2; i++){
+		res[i].re = 0;
+		res[i].im = 0;
+	}
 
 	for (int i = 0; i < BUF_SIZE ; i++) {
 		float val = buf[i]  - (INT16_MAX >> 1);
@@ -96,7 +100,7 @@ int direction (uint16_t* buf){
 			return WEST;
 		}
 	}
-	return -1;
+	return NONE;
 }
 
 

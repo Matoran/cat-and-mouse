@@ -16,7 +16,8 @@ typedef enum {
 	NORTH=0,
 	EAST,
 	SOUTH,
-	WEST
+	WEST,
+	NONE
 } dir_t;
 
 typedef struct {

@@ -19,52 +19,65 @@
 #define BUF_SIZE 400
 
 void draw_cat(cat_t *old, cat_t *new, sprites_t *sprites) {
-	if (new->object.dir == old->object.dir) {
-		switch (new->object.dir) {
-		case NORTH:
-			lcd_filled_rectangle(new->object.pos.x,
-					new->object.pos.y + sprites->cat_im[new->object.dir].height,
+	if (!new->none) {
+		if (new->object.dir == old->object.dir) {
+			switch (new->object.dir) {
+			case NORTH:
+				lcd_filled_rectangle(new->object.pos.x,
+						new->object.pos.y
+								+ sprites->cat_im[new->object.dir].height,
+						old->object.pos.x
+								+ sprites->cat_im[old->object.dir].width,
+						old->object.pos.y
+								+ sprites->cat_im[old->object.dir].height,
+						LCD_WHITE);
+				break;
+			case EAST:
+				lcd_filled_rectangle(new->object.pos.x, new->object.pos.y,
+						old->object.pos.x,
+						old->object.pos.y
+								+ sprites->cat_im[old->object.dir].height,
+						LCD_WHITE);
+				break;
+			case SOUTH:
+				lcd_filled_rectangle(new->object.pos.x, new->object.pos.y,
+						old->object.pos.x
+								+ sprites->cat_im[old->object.dir].width,
+						old->object.pos.y,
+						LCD_WHITE);
+				break;
+			case WEST:
+				lcd_filled_rectangle(
+						new->object.pos.x
+								+ sprites->cat_im[old->object.dir].width,
+						new->object.pos.y,
+						old->object.pos.x
+								+ sprites->cat_im[old->object.dir].width,
+						old->object.pos.y
+								+ sprites->cat_im[old->object.dir].height,
+						LCD_WHITE);
+				break;
+			default:
+				break;
+			}
+		} else {
+			lcd_filled_rectangle(old->object.pos.x, old->object.pos.y,
 					old->object.pos.x + sprites->cat_im[old->object.dir].width,
 					old->object.pos.y + sprites->cat_im[old->object.dir].height,
 					LCD_WHITE);
-			break;
-		case EAST:
-			lcd_filled_rectangle(new->object.pos.x, new->object.pos.y,
-					old->object.pos.x,
-					old->object.pos.y + sprites->cat_im[old->object.dir].height,
-					LCD_WHITE);
-			break;
-		case SOUTH:
-			lcd_filled_rectangle(new->object.pos.x, new->object.pos.y,
-					old->object.pos.x + sprites->cat_im[old->object.dir].width,
-					old->object.pos.y,
-					LCD_WHITE);
-			break;
-		case WEST:
-			lcd_filled_rectangle(
-					new->object.pos.x + sprites->cat_im[old->object.dir].width,
-					new->object.pos.y,
-					old->object.pos.x + sprites->cat_im[old->object.dir].width,
-					old->object.pos.y + sprites->cat_im[old->object.dir].height,
-					LCD_WHITE);
-			break;
 		}
-	} else {
-		lcd_filled_rectangle(old->object.pos.x, old->object.pos.y,
-				old->object.pos.x + sprites->cat_im[old->object.dir].width,
-				old->object.pos.y + sprites->cat_im[old->object.dir].height,
-				LCD_WHITE);
 	}
-
-	display_bitmap16(sprites->cat_im[new->object.dir].bitmap, new->object.pos.x,
-			new->object.pos.y, sprites->cat_im[new->object.dir].width,
-			sprites->cat_im[new->object.dir].height);
+	display_bitmap16(sprites->cat_im[new->object.dir].bitmap,
+					new->object.pos.x, new->object.pos.y,
+					sprites->cat_im[new->object.dir].width,
+					sprites->cat_im[new->object.dir].height);
 }
 
 void init_cat(cat_t *cat) {
 	cat->object.pos.x = 110;
 	cat->object.pos.y = 30;
 	cat->object.dir = SOUTH;
+	cat->none = true;
 }
 
 void task_cat(void *param) {
@@ -73,7 +86,6 @@ void task_cat(void *param) {
 	cat_t cat;
 	init_cat(&cat);
 	int old_direction = cat.object.dir;
-	int dir;
 	int x = (sprites->cat_im[WEST].width - sprites->cat_im[NORTH].width) / 2;
 	int y = (sprites->cat_im[NORTH].height - sprites->cat_im[WEST].height) / 2;
 
@@ -86,22 +98,30 @@ void task_cat(void *param) {
 		if (xQueueReceive(catResetQueue, &reset, 0)) {
 			init_cat(&cat);
 		}
-		old_direction = cat.object.dir;
+		if (cat.object.dir != NONE)
+			old_direction = cat.object.dir;
 		if (xQueueReceive(xQueue, &buf, 0)) {
 			if (buf == 0) {
-    			dir = direction(buf1);
-    			if (dir != -1) {
-    				cat.object.dir = dir;
-    			}
-    		}else if (buf == 1){
-    			dir = direction(buf2);
-    			if (dir != -1) {
-    				cat.object.dir = dir;
-    			}
-    		}
-		}
+				int dir = direction(buf1);
+				if (dir == NONE)
+					cat.none = true;
+				else {
+					cat.object.dir = dir;
+					cat.none = false;
+				}
 
-		switch (cat.object.dir) {
+			} else if (buf == 1) {
+				int dir = direction(buf2);
+				if (dir == NONE)
+					cat.none = true;
+				else {
+					cat.object.dir = dir;
+					cat.none = false;
+				}
+			}
+		}
+		if (!cat.none) {
+			switch (cat.object.dir) {
 			case NORTH:
 				if (old_direction == WEST || old_direction == EAST) {
 					cat.object.pos.x += x;
@@ -140,6 +160,7 @@ void task_cat(void *param) {
 				break;
 			default:
 				break;
+			}
 		}
 		xQueueSend(catQueue, (void * ) &cat, (portTickType ) 0);
 	}

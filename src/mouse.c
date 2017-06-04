@@ -84,6 +84,8 @@ void draw_mouse(mouse_t *old, mouse_t *new, sprites_t *sprites) {
 							+ sprites->mouse_im[old->object.dir].height,
 					LCD_WHITE);
 			break;
+		default:
+			break;
 		}
 	} else {
 		lcd_filled_rectangle(old->object.pos.x, old->object.pos.y,

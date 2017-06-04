@@ -10,6 +10,7 @@
 
 #include "dtmf_detection.h"
 #include "objects.h"
+#include <stdbool.h>
 
 #define JOYSTICK_LEFT	 23
 #define JOYSTICK_RIGHT	 21
@@ -19,6 +20,7 @@
 
 typedef struct cat_t{
 	object_t object;
+	bool none;
 }cat_t;
 
 void init_cat(cat_t *cat);
