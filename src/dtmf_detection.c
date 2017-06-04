@@ -40,7 +40,7 @@ void init_values(){
 }
 
 /**
- * Test if the paddle touch the right border
+ * Test 2 frequencies
  * @param1 Buffer to use in calculation
  * @param2 0 = 852/941, 2 = 1336/1608
  * @return Frequency
@@ -96,7 +96,6 @@ int direction (uint16_t* buf){
 			return WEST;
 		}
 	}
-
 	return -1;
 }
 

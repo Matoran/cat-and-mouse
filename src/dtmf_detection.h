@@ -3,6 +3,7 @@
 
 #include "objects.h"
 #include "define.h"
+#define BUF_SIZE 400
 
 #define BUF_SIZE 400
 #define LIMIT_DETEC 2000000
@@ -24,5 +25,6 @@ typedef struct complex{
 int direction (uint16_t* buf);
 unsigned short* init_dtmf();
 dir_t read_dtmf(int buf_idx);
+int direction (uint16_t* buf);
 
 #endif
